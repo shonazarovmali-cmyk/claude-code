@@ -53,7 +53,12 @@ Talablar: JDK 17+, Android SDK (compileSdk 34, build-tools 34.0.0).
 ```bash
 cd android/hanfood-warehouse
 ./gradlew assembleDebug
-# APK: app/build/outputs/apk/debug/app-debug.apk
+# APK: app/build/outputs/apk/debug/app-debug.apk (~43 MB, siqilmagan)
+
+./gradlew assembleRelease
+# APK: app/build/outputs/apk/release/app-release.apk (~12 MB, R8 + resurs siqish bilan)
+# Hozircha debug kaliti bilan imzolangan — to'g'ridan-to'g'ri o'rnatsa bo'ladi,
+# lekin Google Play'ga chiqarish uchun o'z release kalitingiz kerak bo'ladi.
 ```
 
 Android Studio orqali ochish uchun: `File → Open` → shu papkani tanlang,
