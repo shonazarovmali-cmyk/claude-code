@@ -18,6 +18,12 @@ android {
         versionName = "1.0.0"
 
         vectorDrawables.useSupportLibrary = true
+
+        // Haqiqiy telefonlar deyarli barchasi shu ikki ABI'dan biri — emulator-only
+        // x86/x86_64 kutubxonalarini chiqarib tashlab APK hajmini qisqartiramiz.
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
     }
 
     buildTypes {
@@ -25,6 +31,9 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+            // Eslatma: sinov/tarqatish uchun debug kaliti bilan imzolanadi. Google Play'ga
+            // chiqarishdan oldin bu yerga o'zingizning release signingConfig'ingizni bering.
+            signingConfig = signingConfigs.getByName("debug")
         }
         debug {
             isMinifyEnabled = false
