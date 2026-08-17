@@ -21,7 +21,6 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Scale
-import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
@@ -57,7 +56,6 @@ fun DashboardScreen(
     repository: WarehouseRepository,
     onQuickAction: (String) -> Unit,
     onScanner: () -> Unit,
-    onAssistant: () -> Unit,
     onOpenInvoice: (Long) -> Unit
 ) {
     val viewModel: DashboardViewModel = viewModel(factory = GenericViewModelFactory { DashboardViewModel(repository) })
@@ -82,7 +80,7 @@ fun DashboardScreen(
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
-        item { QuickActionsGrid(onQuickAction, onScanner, onAssistant) }
+        item { QuickActionsGrid(onQuickAction, onScanner, modifier = Modifier.aspectRatio(3.85f)) }
 
         item {
             Text(
@@ -170,19 +168,18 @@ private fun LowStockBanner(count: Int) {
 private data class QuickAction(val titleRes: Int, val icon: ImageVector, val action: String)
 
 @Composable
-private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> Unit, onAssistant: () -> Unit) {
+private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> Unit, modifier: Modifier = Modifier) {
     val actions = listOf(
         QuickAction(R.string.quick_action_stock_in, Icons.Filled.Inventory2, "STOCK_IN"),
         QuickAction(R.string.quick_action_stock_out, Icons.Filled.LocalShipping, "STOCK_OUT"),
         QuickAction(R.string.quick_action_return, Icons.Filled.Undo, "RETURN"),
-        QuickAction(R.string.quick_action_scan, Icons.Filled.QrCodeScanner, "SCAN"),
-        QuickAction(R.string.quick_action_assistant, Icons.Filled.SmartToy, "ASSISTANT")
+        QuickAction(R.string.quick_action_scan, Icons.Filled.QrCodeScanner, "SCAN")
     )
     LazyVerticalGrid(
-        columns = GridCells.Fixed(3),
+        columns = GridCells.Fixed(4),
         horizontalArrangement = Arrangement.spacedBy(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp),
-        modifier = Modifier.aspectRatio(1.55f)
+        modifier = modifier
     ) {
         items(actions) { action ->
             val title = stringResource(action.titleRes)
@@ -192,7 +189,6 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
                 onClick = {
                     when (action.action) {
                         "SCAN" -> onScanner()
-                        "ASSISTANT" -> onAssistant()
                         else -> onQuickAction(action.action)
                     }
                 },

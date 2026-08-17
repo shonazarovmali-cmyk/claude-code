@@ -2,8 +2,8 @@
 
 **HAN FOOD** oziq-ovqat ombori uchun Android ilova: yuk kirim-chiqimini hisoblash,
 mijozlarga yuk berish va qaytarishni kuzatish, fakturalarni yig'ish va
-hisobotlarni ko'rish, telefon kamerasi orqali shtrix-kod/QR-kod skanerlash
-hamda ombor holati bo'yicha savolларга javob beradigan lokal AI yordamchisi.
+hisobotlarni ko'rish hamda telefon kamerasi orqali shtrix-kod/QR-kod
+skanerlash.
 
 Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 (Room/SQLite) saqlanadi, internet talab qilinmaydi.
@@ -31,10 +31,6 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 - **Shtrix-kod/QR skaneri**: CameraX + ML Kit orqali telefon kamerasi bilan
   jonli skanerlash — mahsulot qo'shishda ham, faktura tuzishda ham
   ishlatiladi.
-- **AI Yordamchi**: ombor ma'lumotlari asosida ishlaydigan, internetsiz
-  ishlaydigan tahlil motori — "Qaysi mahsulotlar tugab qolyapti?", "Bu oy
-  qancha yuk berildi?", "Eng faol mijozlar kim?" kabi savollarga real
-  raqamlar bilan javob beradi.
 - **Xavfsizlik**: ilova PIN-kod bilan himoyalangan, ixtiyoriy ravishda
   barmoq izi (biometrik) orqali ham kirish mumkin. PIN faqat tuzlangan xesh
   ko'rinishida, Android Keystore bilan shifrlangan xotirada saqlanadi.
@@ -105,17 +101,16 @@ app/src/main/java/com/hanfood/warehouse/
 ├── data/
 │   ├── local/          # Room: entity, dao, AppDatabase, Converters
 │   └── repository/     # WarehouseRepository — yagona yozish/o'qish darvozasi
-├── ai/                 # AiEngine interfeysi + LocalAiAnalysisEngine
 ├── security/            # PinManager (EncryptedSharedPreferences), BiometricHelper
 ├── ui/
 │   ├── theme/           # Rang, tipografiya, Material3 tema
 │   ├── navigation/      # Routes, ScannerBus, HanFoodNavGraph
 │   ├── components/      # Umumiy composable'lar
 │   └── screens/         # dashboard, products, clients, stock (kirim/chiqim/
-│                         # qaytarish), scanner, invoices, reports, assistant,
+│                         # qaytarish), scanner, invoices, reports,
 │                         # settings, auth (PIN)
 ├── util/                # Formatlash, ViewModel factory, PDF/DB eksport, LanguageManager
-├── HanFoodApp.kt         # Application — repository/pinManager/aiEngine
+├── HanFoodApp.kt         # Application — repository/pinManager
 └── MainActivity.kt       # Yagona Activity, Compose Navigation host
 ```
 
@@ -128,27 +123,6 @@ mahsulotning qoldig'i (`Product.quantity`) yangilanadi. Chiqim (`STOCK_OUT`)
 uchun avval barcha qatorlarning qoldig'i yetarli ekani tekshiriladi — aks
 holda `InsufficientStockException` otiladi va hech narsa yozilmaydi.
 
-### AI yordamchi haqida muhim eslatma
-
-Joriy AI yordamchi **haqiqiy til modeli (LLM) emas** — u ombordagi
-ma'lumotlarni to'g'ridan-to'g'ri SQL so'rovlari orqali hisoblab, tayyor
-qoida asosida javob shakllantiradigan lokal tahlil motori
-(`LocalAiAnalysisEngine`). Bu tanlov ataylab qilindi: internetsiz ishlaydi,
-tezkor, va hech qachon noto'g'ri raqam "o'ylab topmaydi" (gallyutsinatsiya
-yo'q).
-
-Agar kelajakda haqiqiy LLM (masalan Claude API) ulashni xohlasangiz:
-
-1. `ai/AiEngine` interfeysini amalga oshiruvchi yangi klass yozing
-   (masalan `ClaudeAiEngine`, ombor ma'lumotlarini kontekst sifatida
-   API'ga yuborib, javobni qaytaradi).
-2. `HanFoodApp.aiEngine` propertysida shu yangi klassni qaytaring.
-3. Ekran va ViewModel kodini o'zgartirish shart emas.
-
-Buning uchun internet ruxsati (`INTERNET` permission — hozir ML Kit
-kutubxonasi tomonidan avtomatik qo'shilgan, lekin ishlatilmaydi) va API
-kalitini xavfsiz saqlash kerak bo'ladi.
-
 ## Ko'p tillilik arxitekturasi
 
 - Barcha matnlar `res/values*/strings.xml` fayllarida (`values` — inglizcha
@@ -158,10 +132,6 @@ kalitini xavfsiz saqlash kerak bo'ladi.
 - Til tanlash `util/LanguageManager.kt` orqali (`AppCompatDelegate.setApplicationLocales`)
   — Sozlamalar ekranidagi almashtirish darhol qo'llanadi, ilovani qayta
   ishga tushirish shart emas.
-- `ai/LocalAiAnalysisEngine.kt` — AI yordamchi javoblari ham `Context.getString(...)`
-  orqali joriy tilda shakllantiriladi. Erkin matn kiritilganda mavzu
-  (kam qoldiq, kirim/chiqim va h.k.) barcha 7 tildagi kalit so'zlar bo'yicha
-  aniqlanadi — foydalanuvchi qaysi tilda yozishidan qat'i nazar tushuniladi.
 - Pul birligi — **złoty (zł)**. Barcha summalar ilova ichida shu valyutada
   ko'rsatiladi (raqamlar guruhlash formati polyakcha standartga mos: `1 250 000 zł`),
   UI tilidan qat'i nazar — xuddi boshqa ilovalarda "$" yoki "€" belgisi

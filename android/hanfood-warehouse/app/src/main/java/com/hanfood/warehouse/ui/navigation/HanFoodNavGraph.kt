@@ -28,7 +28,6 @@ import com.hanfood.warehouse.security.BiometricHelper
 import com.hanfood.warehouse.ui.components.BrandHeader
 import com.hanfood.warehouse.ui.components.TopTab
 import com.hanfood.warehouse.ui.components.TopTabMenu
-import com.hanfood.warehouse.ui.screens.assistant.AiAssistantScreen
 import com.hanfood.warehouse.ui.screens.auth.PinSetupScreen
 import com.hanfood.warehouse.ui.screens.auth.PinUnlockScreen
 import com.hanfood.warehouse.ui.screens.clients.ClientEditScreen
@@ -58,7 +57,6 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
     val navController = rememberNavController()
     val repository = app.repository
     val pinManager = app.pinManager
-    val aiEngine = app.aiEngine
     val topTabs = rememberTopTabs()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
@@ -143,7 +141,6 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
                     repository = repository,
                     onQuickAction = { type -> navController.navigate(Routes.movement(type)) },
                     onScanner = { navController.navigate(Routes.SCANNER) },
-                    onAssistant = { navController.navigate(Routes.ASSISTANT) },
                     onOpenInvoice = { id -> navController.navigate(Routes.invoiceDetail(id)) }
                 )
             }
@@ -204,10 +201,6 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
 
             composable(Routes.REPORTS) {
                 ReportsScreen(repository = repository)
-            }
-
-            composable(Routes.ASSISTANT) {
-                AiAssistantScreen(engine = aiEngine)
             }
 
             composable(Routes.SETTINGS) {

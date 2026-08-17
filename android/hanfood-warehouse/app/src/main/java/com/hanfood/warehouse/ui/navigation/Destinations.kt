@@ -11,7 +11,6 @@ object Routes {
     const val CLIENTS = "clients"
     const val INVOICES = "invoices"
     const val REPORTS = "reports"
-    const val ASSISTANT = "assistant"
     const val SETTINGS = "settings"
 
     const val PRODUCT_EDIT_ARG = "productId"
