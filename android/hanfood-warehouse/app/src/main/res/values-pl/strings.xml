@@ -190,4 +190,13 @@
     <string name="settings_language_system">Domyślny systemowy</string>
     <string name="settings_language_dialog_title">Wybierz język</string>
     <string name="action_close">Zamknij</string>
+    <string name="product_photo_add">Dodaj zdjęcie</string>
+    <string name="product_photo_change">Zmień zdjęcie</string>
+    <string name="product_photo_remove">Usuń</string>
+    <string name="cd_product_photo">Zdjęcie produktu</string>
+    <string name="invoice_title_field">Nazwa dokumentu (opcjonalnie)</string>
+    <string name="invoice_attach_file">Dołącz plik/zdjęcie</string>
+    <string name="invoice_attachments_label">Załączniki</string>
+    <string name="cd_attachment_remove">Usuń załącznik</string>
+    <string name="cd_open_attachment">Otwórz załącznik</string>
 </resources>

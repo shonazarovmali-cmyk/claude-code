@@ -190,4 +190,13 @@
     <string name="settings_language_system">System default</string>
     <string name="settings_language_dialog_title">Choose a language</string>
     <string name="action_close">Close</string>
+    <string name="product_photo_add">Add photo</string>
+    <string name="product_photo_change">Change photo</string>
+    <string name="product_photo_remove">Remove</string>
+    <string name="cd_product_photo">Product photo</string>
+    <string name="invoice_title_field">Invoice name (optional)</string>
+    <string name="invoice_attach_file">Attach file/photo</string>
+    <string name="invoice_attachments_label">Attachments</string>
+    <string name="cd_attachment_remove">Remove attachment</string>
+    <string name="cd_open_attachment">Open attachment</string>
 </resources>

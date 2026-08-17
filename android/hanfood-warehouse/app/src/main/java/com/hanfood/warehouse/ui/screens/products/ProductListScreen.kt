@@ -1,16 +1,21 @@
 package com.hanfood.warehouse.ui.screens.products
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.Card
@@ -28,11 +33,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Product
 import com.hanfood.warehouse.data.repository.WarehouseRepository
@@ -40,6 +48,7 @@ import com.hanfood.warehouse.ui.components.EmptyState
 import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.formatMoney
 import com.hanfood.warehouse.util.formatQuantity
+import java.io.File
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -54,7 +63,6 @@ fun ProductListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.products_title), fontWeight = FontWeight.Bold) }) },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text(stringResource(R.string.products_add)) })
         }
@@ -113,7 +121,8 @@ private fun ProductRow(product: Product, onClick: () -> Unit) {
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(modifier = Modifier.weight(1f)) {
+            ProductThumbnail(product.imagePath)
+            Column(modifier = Modifier.weight(1f).padding(start = 10.dp)) {
                 Text(product.name, fontWeight = FontWeight.SemiBold)
                 Text(
                     listOfNotNull(
@@ -132,6 +141,33 @@ private fun ProductRow(product: Product, onClick: () -> Unit) {
                 )
                 Text(formatMoney(product.sellPrice), style = MaterialTheme.typography.labelMedium)
             }
+        }
+    }
+}
+
+@Composable
+private fun ProductThumbnail(imagePath: String?) {
+    Box(
+        modifier = Modifier
+            .size(48.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surface),
+        contentAlignment = Alignment.Center
+    ) {
+        if (imagePath != null) {
+            AsyncImage(
+                model = File(imagePath),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(
+                Icons.Filled.Inventory2,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.size(22.dp)
+            )
         }
     }
 }

@@ -49,30 +49,26 @@ fun InvoiceListScreen(
     val rows by viewModel.rows.collectAsStateWithLifecycle()
     val selectedType by viewModel.selectedType.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.invoices_title), fontWeight = FontWeight.Bold) }) }
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
-            Row(
-                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                FilterChip(selected = selectedType == null, onClick = { viewModel.selectType(null) }, label = { Text(stringResource(R.string.filter_all)) })
-                FilterChip(selected = selectedType == TransactionType.STOCK_IN, onClick = { viewModel.selectType(TransactionType.STOCK_IN) }, label = { Text(stringResource(R.string.transaction_type_stock_in)) })
-                FilterChip(selected = selectedType == TransactionType.STOCK_OUT, onClick = { viewModel.selectType(TransactionType.STOCK_OUT) }, label = { Text(stringResource(R.string.transaction_type_stock_out)) })
-                FilterChip(selected = selectedType == TransactionType.RETURN, onClick = { viewModel.selectType(TransactionType.RETURN) }, label = { Text(stringResource(R.string.transaction_type_return)) })
-            }
+    Column(modifier = Modifier.fillMaxSize()) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            FilterChip(selected = selectedType == null, onClick = { viewModel.selectType(null) }, label = { Text(stringResource(R.string.filter_all)) })
+            FilterChip(selected = selectedType == TransactionType.STOCK_IN, onClick = { viewModel.selectType(TransactionType.STOCK_IN) }, label = { Text(stringResource(R.string.transaction_type_stock_in)) })
+            FilterChip(selected = selectedType == TransactionType.STOCK_OUT, onClick = { viewModel.selectType(TransactionType.STOCK_OUT) }, label = { Text(stringResource(R.string.transaction_type_stock_out)) })
+            FilterChip(selected = selectedType == TransactionType.RETURN, onClick = { viewModel.selectType(TransactionType.RETURN) }, label = { Text(stringResource(R.string.transaction_type_return)) })
+        }
 
-            if (rows.isEmpty()) {
-                EmptyState(title = stringResource(R.string.invoices_empty_title), subtitle = stringResource(R.string.invoices_empty_subtitle))
-            } else {
-                LazyColumn(
-                    contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    items(rows, key = { it.transaction.id }) { row ->
-                        InvoiceRowCard(row, onClick = { onOpen(row.transaction.id) })
-                    }
+        if (rows.isEmpty()) {
+            EmptyState(title = stringResource(R.string.invoices_empty_title), subtitle = stringResource(R.string.invoices_empty_subtitle))
+        } else {
+            LazyColumn(
+                contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(rows, key = { it.transaction.id }) { row ->
+                    InvoiceRowCard(row, onClick = { onOpen(row.transaction.id) })
                 }
             }
         }

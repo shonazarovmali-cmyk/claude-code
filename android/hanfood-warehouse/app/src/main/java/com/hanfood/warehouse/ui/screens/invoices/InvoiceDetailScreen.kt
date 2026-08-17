@@ -1,16 +1,23 @@
 package com.hanfood.warehouse.ui.screens.invoices
 
 import android.content.Intent
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.Divider
@@ -23,23 +30,29 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionItemDetail
 import com.hanfood.warehouse.data.local.entity.TransactionType
+import com.hanfood.warehouse.data.local.entity.toAttachmentList
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.ui.components.transactionTypeLabel
+import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.InvoicePdfExporter
 import com.hanfood.warehouse.util.formatDateTime
 import com.hanfood.warehouse.util.formatMoney
 import com.hanfood.warehouse.util.formatQuantity
+import java.io.File
 
 @Composable
 fun InvoiceDetailScreen(
@@ -67,7 +80,8 @@ fun InvoiceDetailScreen(
     Scaffold(
         topBar = {
             BackTopBar(
-                title = state.transaction?.invoiceNumber ?: stringResource(R.string.invoice_detail_title_fallback),
+                title = state.transaction?.let { it.title?.takeIf { t -> t.isNotBlank() } ?: it.invoiceNumber }
+                    ?: stringResource(R.string.invoice_detail_title_fallback),
                 onBack = onBack,
                 actions = {
                     if (state.transaction != null) {
@@ -107,6 +121,19 @@ fun InvoiceDetailScreen(
                 InfoRow(stringResource(R.string.invoice_field_date), formatDateTime(tx.date))
                 InfoRow(counterpartyLabelText, counterpartyNameText)
                 if (!tx.note.isNullOrBlank()) InfoRow(stringResource(R.string.invoice_field_note), tx.note)
+
+                val attachments = tx.attachmentPaths.toAttachmentList()
+                if (attachments.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.invoice_attachments_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.padding(top = 4.dp)) {
+                        items(attachments, key = { it }) { path -> AttachmentPreview(path) }
+                    }
+                }
             }
             Divider()
             LazyColumn(
@@ -124,6 +151,43 @@ fun InvoiceDetailScreen(
                 Text(stringResource(R.string.invoice_total_label), style = MaterialTheme.typography.titleMedium)
                 Text(formatMoney(tx.totalAmount), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
             }
+        }
+    }
+}
+
+private val imageExtensions = setOf("jpg", "jpeg", "png", "webp")
+
+@Composable
+private fun AttachmentPreview(path: String) {
+    val context = LocalContext.current
+    val isImage = File(path).extension.lowercase() in imageExtensions
+    val openLabel = stringResource(R.string.cd_open_attachment)
+
+    Box(
+        modifier = Modifier
+            .size(64.dp)
+            .clip(RoundedCornerShape(10.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .clickable {
+                val uri = FileStorage.contentUriFor(context, path)
+                val mimeType = if (isImage) "image/*" else "*/*"
+                val intent = Intent(Intent.ACTION_VIEW).apply {
+                    setDataAndType(uri, mimeType)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                runCatching { context.startActivity(intent) }
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        if (isImage) {
+            AsyncImage(
+                model = File(path),
+                contentDescription = openLabel,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+        } else {
+            Icon(Icons.Filled.InsertDriveFile, contentDescription = openLabel)
         }
     }
 }

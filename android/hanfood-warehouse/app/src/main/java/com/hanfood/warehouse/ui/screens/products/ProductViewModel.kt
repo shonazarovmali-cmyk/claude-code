@@ -40,6 +40,7 @@ data class ProductEditUiState(
     val purchasePrice: String = "0",
     val sellPrice: String = "0",
     val category: String = "",
+    val imagePath: String? = null,
     val loaded: Boolean = false,
     val saved: Boolean = false,
     @StringRes val errorRes: Int? = null
@@ -68,6 +69,7 @@ class ProductEditViewModel(
                         purchasePrice = product.purchasePrice.toPlainStringTrimmed(),
                         sellPrice = product.sellPrice.toPlainStringTrimmed(),
                         category = product.category.orEmpty(),
+                        imagePath = product.imagePath,
                         loaded = true
                     )
                 } else {
@@ -83,6 +85,14 @@ class ProductEditViewModel(
 
     fun applyScannedBarcode(code: String) {
         _state.value = _state.value.copy(barcode = code)
+    }
+
+    fun applyPickedImage(path: String) {
+        _state.value = _state.value.copy(imagePath = path)
+    }
+
+    fun clearImage() {
+        _state.value = _state.value.copy(imagePath = null)
     }
 
     fun save() {
@@ -101,7 +111,8 @@ class ProductEditViewModel(
                 minQuantity = s.minQuantity.toDoubleOrNull() ?: 0.0,
                 purchasePrice = s.purchasePrice.toDoubleOrNull() ?: 0.0,
                 sellPrice = s.sellPrice.toDoubleOrNull() ?: 0.0,
-                category = s.category.trim().ifBlank { null }
+                category = s.category.trim().ifBlank { null },
+                imagePath = s.imagePath
             )
             try {
                 repository.upsertProduct(product)

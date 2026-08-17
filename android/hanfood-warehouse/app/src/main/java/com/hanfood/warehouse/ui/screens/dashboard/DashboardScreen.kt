@@ -12,22 +12,22 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Groups
+import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.QrCodeScanner
-import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.Scale
 import androidx.compose.material.icons.filled.SmartToy
 import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -43,77 +43,66 @@ import com.hanfood.warehouse.data.local.entity.StockTransaction
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.StatCard
 import com.hanfood.warehouse.ui.components.transactionTypeLabel
+import com.hanfood.warehouse.ui.theme.BrandGold
+import com.hanfood.warehouse.ui.theme.BrandNavy
+import com.hanfood.warehouse.ui.theme.BrandTeal
+import com.hanfood.warehouse.ui.theme.SuccessGreen
 import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.formatDateTime
 import com.hanfood.warehouse.util.formatMoney
 import com.hanfood.warehouse.util.formatQuantity
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DashboardScreen(
     repository: WarehouseRepository,
     onQuickAction: (String) -> Unit,
     onScanner: () -> Unit,
     onAssistant: () -> Unit,
-    onSettings: () -> Unit,
     onOpenInvoice: (Long) -> Unit
 ) {
     val viewModel: DashboardViewModel = viewModel(factory = GenericViewModelFactory { DashboardViewModel(repository) })
     val state by viewModel.uiState.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = {
-            CenterAlignedTopAppBar(
-                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) },
-                actions = {
-                    IconButton(onClick = onSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.cd_settings))
-                    }
-                }
+    LazyColumn(
+        modifier = Modifier.fillMaxWidth(),
+        contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        item { StatsGrid(state) }
+
+        if (state.lowStock.isNotEmpty()) {
+            item { LowStockBanner(count = state.lowStock.size) }
+        }
+
+        item {
+            Text(
+                stringResource(R.string.dashboard_quick_actions),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
-    ) { padding ->
-        LazyColumn(
-            modifier = Modifier.fillMaxWidth(),
-            contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            item { StatsGrid(state) }
+        item { QuickActionsGrid(onQuickAction, onScanner, onAssistant) }
 
-            if (state.lowStock.isNotEmpty()) {
-                item { LowStockBanner(count = state.lowStock.size) }
-            }
-
+        item {
+            Text(
+                stringResource(R.string.dashboard_recent_transactions),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        if (state.recentTransactions.isEmpty()) {
             item {
                 Text(
-                    stringResource(R.string.dashboard_quick_actions),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 4.dp)
+                    stringResource(R.string.dashboard_no_transactions_yet),
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(vertical = 8.dp)
                 )
             }
-            item { QuickActionsGrid(onQuickAction, onScanner, onAssistant) }
-
-            item {
-                Text(
-                    stringResource(R.string.dashboard_recent_transactions),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 4.dp)
-                )
-            }
-            if (state.recentTransactions.isEmpty()) {
-                item {
-                    Text(
-                        stringResource(R.string.dashboard_no_transactions_yet),
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                }
-            } else {
-                items(state.recentTransactions) { tx ->
-                    RecentTransactionRow(tx, onClick = { onOpenInvoice(tx.id) })
-                }
+        } else {
+            items(state.recentTransactions) { tx ->
+                RecentTransactionRow(tx, onClick = { onOpenInvoice(tx.id) })
             }
         }
     }
@@ -126,26 +115,32 @@ private fun StatsGrid(state: DashboardUiState) {
             StatCard(
                 label = stringResource(R.string.dashboard_stat_stock_value),
                 value = formatMoney(state.totalStockValue),
+                icon = Icons.Filled.AttachMoney,
+                accent = BrandTeal,
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 label = stringResource(R.string.dashboard_stat_total_units),
                 value = formatQuantity(state.totalUnits),
-                modifier = Modifier.weight(1f),
-                accent = MaterialTheme.colorScheme.secondary
+                icon = Icons.Filled.Scale,
+                accent = BrandGold,
+                modifier = Modifier.weight(1f)
             )
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             StatCard(
                 label = stringResource(R.string.dashboard_stat_product_types),
                 value = state.productCount.toString(),
+                icon = Icons.Filled.Inventory,
+                accent = BrandNavy,
                 modifier = Modifier.weight(1f)
             )
             StatCard(
                 label = stringResource(R.string.dashboard_stat_clients),
                 value = state.clientCount.toString(),
-                modifier = Modifier.weight(1f),
-                accent = MaterialTheme.colorScheme.secondary
+                icon = Icons.Filled.Groups,
+                accent = SuccessGreen,
+                modifier = Modifier.weight(1f)
             )
         }
     }
@@ -153,7 +148,10 @@ private fun StatsGrid(state: DashboardUiState) {
 
 @Composable
 private fun LowStockBanner(count: Int) {
-    Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)) {
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(14.dp),
             verticalAlignment = androidx.compose.ui.Alignment.CenterVertically,
@@ -190,6 +188,7 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
             val title = stringResource(action.titleRes)
             Card(
                 modifier = Modifier.fillMaxWidth().aspectRatio(1f),
+                shape = RoundedCornerShape(16.dp),
                 onClick = {
                     when (action.action) {
                         "SCAN" -> onScanner()
@@ -197,6 +196,7 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
                         else -> onQuickAction(action.action)
                     }
                 },
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
             ) {
                 Column(
@@ -220,7 +220,12 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
 
 @Composable
 private fun RecentTransactionRow(tx: StockTransaction, onClick: () -> Unit) {
-    Card(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(14.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
+        onClick = onClick
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth().padding(12.dp),
             horizontalArrangement = Arrangement.SpaceBetween,

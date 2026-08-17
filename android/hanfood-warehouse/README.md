@@ -10,8 +10,10 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 
 ## Asosiy imkoniyatlar
 
-- **Mahsulotlar**: nomi, shtrix-kodi, o'lchov birligi, joriy/minimal qoldiq,
-  tannarx va sotish narxi bilan boshqarish.
+- **Mahsulotlar**: nomi, shtrix-kodi, **rasmi**, o'lchov birligi, joriy/minimal
+  qoldiq, tannarx va sotish narxi bilan boshqarish. Mahsulot qo'shishda
+  telefon galereyasidan rasm biriktirish mumkin, rasm ro'yxatda va tahrirlash
+  ekranida ko'rinadi.
 - **Mijozlar**: nomi, telefoni, manzili bilan mijozlar bazasi.
 - **Kirim** — ta'minotchidan yuk qabul qilish (qoldiqqa qo'shiladi).
 - **Chiqim (yuk berish)** — mijozga yuk berish (qoldiqdan ayiriladi, yetarli
@@ -19,7 +21,10 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 - **Qaytarish** — mijozdan yukning qaytishi (qoldiqqa qayta qo'shiladi).
 - **Fakturalar**: har bir kirim/chiqim/qaytarish avtomatik faktura raqami
   bilan (masalan `CHQ-20260812-0001`) qayd etiladi, PDF sifatida eksport va
-  ulashish mumkin.
+  ulashish mumkin. Har bir faktura uchun ixtiyoriy **nom** kiritish va
+  **fayl/rasm biriktirish** (masalan tovar-transport hujjati skani yoki yuk
+  fotosi) mumkin — biriktirilgan fayllar faktura tafsilotlarida ko'rinadi va
+  bosilganda ochiladi.
 - **Hisobotlar**: davr bo'yicha (bugun/hafta/oy/barcha vaqt) kirim-chiqim
   summasi, eng ko'p berilgan mahsulotlar, eng faol mijozlar, kam qolgan
   mahsulotlar ro'yxati.
@@ -41,11 +46,32 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   mumkin (ilovani qayta o'rnatmasdan, darhol qo'llanadi). AI Yordamchi ham
   tanlangan tilda javob beradi.
 
+## Dizayn / brend
+
+- Ilova logotipi (`HAN FOOD` yozuvi + teal/oltin rangli geometrik gul nishoni)
+  mijoz yuborgan animatsiyadan (`HAN_FOOD_animacja.mp4`) olingan. To'liq
+  logotip ilova ochilganda **splash ekran**ida va Sozlamalar → Ilova haqida
+  bo'limida ko'rsatiladi (`res/drawable-nodpi/han_food_logo.png`).
+- Ilova ikonkasi logotipdagi gul nishonining vektor qayta chizilgan versiyasi
+  (manba video past piksel zichlikda bo'lgani uchun to'g'ridan-to'g'ri
+  ishlatib bo'lmadi — barcha o'lchamlarda aniq ko'rinishi uchun vektor
+  sifatida qayta yaratildi: `res/drawable/ic_launcher_foreground.xml`).
+- Rang sxemasi — **yashil va oq** (mijoz talabiga ko'ra): asosiy rang
+  logotipdagi to'q yashil siyoh rangidan olingan (`BrandGreen #1E6F4C`),
+  fon/sirtlar oq, teal/oltin/lojuvard faqat kichik brend urg'ulari sifatida
+  (sarlavha gradienti, ikonka) qoldirilgan. Sozlamalar → Til kabi qorong'i
+  rejim uchun ham mos palitra bor.
+- **Yuqori menyu**: navigatsiya pastki panel o'rniga ilovaning **tepasida**
+  joylashgan (`ui/components/TopTabMenu.kt`) — tanlangan bo'lim rangi
+  to'qlashadi (qalin, asosiy yashil rangda), boshqalari xira ko'rinadi.
+
 ## Texnologiyalar
 
 - Kotlin + Jetpack Compose (Material 3)
-- Room (SQLite) — lokal ma'lumotlar bazasi
+- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` bilan
+  (mahsulot rasmi, faktura nomi/biriktirmalar ustunlari qo'shildi)
 - CameraX + ML Kit Barcode Scanning
+- Coil — mahsulot rasmi va faktura biriktirmalarini ko'rsatish
 - Navigation Compose
 - EncryptedSharedPreferences + BiometricPrompt — xavfsizlik
 - `android.graphics.pdf` — tashqi kutubxonasiz PDF faktura yaratish
@@ -136,9 +162,10 @@ kalitini xavfsiz saqlash kerak bo'ladi.
   orqali joriy tilda shakllantiriladi. Erkin matn kiritilganda mavzu
   (kam qoldiq, kirim/chiqim va h.k.) barcha 7 tildagi kalit so'zlar bo'yicha
   aniqlanadi — foydalanuvchi qaysi tilda yozishidan qat'i nazar tushuniladi.
-- Pul birligi ("so'm") ataylab tarjima qilinmagan — bu O'zbekiston so'mining
-  o'zi, xuddi boshqa ilovalarda "$" yoki "€" belgisi tarjima qilinmagani
-  kabi.
+- Pul birligi — **złoty (zł)**. Barcha summalar ilova ichida shu valyutada
+  ko'rsatiladi (raqamlar guruhlash formati polyakcha standartga mos: `1 250 000 zł`),
+  UI tilidan qat'i nazar — xuddi boshqa ilovalarda "$" yoki "€" belgisi
+  tarjima qilinmagani kabi, "zł" ham doim shunday qoladi.
 
 ## Ma'lum cheklovlar / keyingi qadamlar
 

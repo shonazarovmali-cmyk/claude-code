@@ -190,4 +190,13 @@
     <string name="settings_language_system">Sistem varsayılanı</string>
     <string name="settings_language_dialog_title">Bir dil seçin</string>
     <string name="action_close">Kapat</string>
+    <string name="product_photo_add">Fotoğraf ekle</string>
+    <string name="product_photo_change">Fotoğrafı değiştir</string>
+    <string name="product_photo_remove">Kaldır</string>
+    <string name="cd_product_photo">Ürün fotoğrafı</string>
+    <string name="invoice_title_field">Fatura adı (isteğe bağlı)</string>
+    <string name="invoice_attach_file">Dosya/fotoğraf ekle</string>
+    <string name="invoice_attachments_label">Ekler</string>
+    <string name="cd_attachment_remove">Eki kaldır</string>
+    <string name="cd_open_attachment">Eki aç</string>
 </resources>

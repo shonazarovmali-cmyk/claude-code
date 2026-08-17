@@ -190,4 +190,13 @@
     <string name="settings_language_system">Tizim tili</string>
     <string name="settings_language_dialog_title">Tilni tanlang</string>
     <string name="action_close">Yopish</string>
+    <string name="product_photo_add">Rasm qo\'shish</string>
+    <string name="product_photo_change">Rasmni almashtirish</string>
+    <string name="product_photo_remove">O\'chirish</string>
+    <string name="cd_product_photo">Mahsulot rasmi</string>
+    <string name="invoice_title_field">Faktura nomi (ixtiyoriy)</string>
+    <string name="invoice_attach_file">Fayl/rasm biriktirish</string>
+    <string name="invoice_attachments_label">Biriktirilgan fayllar</string>
+    <string name="cd_attachment_remove">Faylni o\'chirish</string>
+    <string name="cd_open_attachment">Faylni ochish</string>
 </resources>

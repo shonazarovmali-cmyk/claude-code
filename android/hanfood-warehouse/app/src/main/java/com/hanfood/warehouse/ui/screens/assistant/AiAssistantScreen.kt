@@ -62,7 +62,7 @@ fun AiAssistantScreen(engine: AiEngine) {
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Filled.SmartToy, contentDescription = null)
-                        Text(stringResource(R.string.assistant_title), fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.assistant_title), style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.Bold)
                     }
                 }
             )

@@ -18,8 +18,10 @@ data class MovementUiState(
     val supplierName: String = "",
     val clientId: Long? = null,
     val clientName: String = "",
+    val title: String = "",
     val note: String = "",
     val lines: List<CartLine> = emptyList(),
+    val attachments: List<String> = emptyList(),
     val saving: Boolean = false,
     val error: UiMessage? = null,
     val infoMessage: UiMessage? = null,
@@ -52,6 +54,18 @@ class MovementViewModel(
 
     fun setNote(value: String) {
         _state.value = _state.value.copy(note = value)
+    }
+
+    fun setTitle(value: String) {
+        _state.value = _state.value.copy(title = value)
+    }
+
+    fun addAttachment(path: String) {
+        _state.value = _state.value.copy(attachments = _state.value.attachments + path)
+    }
+
+    fun removeAttachment(path: String) {
+        _state.value = _state.value.copy(attachments = _state.value.attachments.filterNot { it == path })
     }
 
     fun dismissMessages() {
@@ -128,17 +142,23 @@ class MovementViewModel(
                     TransactionType.STOCK_IN -> repository.recordStockIn(
                         supplierName = s.supplierName.trim().ifBlank { null },
                         note = s.note.trim().ifBlank { null },
-                        lines = s.lines
+                        lines = s.lines,
+                        title = s.title,
+                        attachmentPaths = s.attachments
                     )
                     TransactionType.STOCK_OUT -> repository.recordStockOut(
                         clientId = requireNotNull(s.clientId),
                         note = s.note.trim().ifBlank { null },
-                        lines = s.lines
+                        lines = s.lines,
+                        title = s.title,
+                        attachmentPaths = s.attachments
                     )
                     TransactionType.RETURN -> repository.recordReturn(
                         clientId = requireNotNull(s.clientId),
                         note = s.note.trim().ifBlank { null },
-                        lines = s.lines
+                        lines = s.lines,
+                        title = s.title,
+                        attachmentPaths = s.attachments
                     )
                 }
                 _state.value = _state.value.copy(saving = false, savedTransactionId = transactionId)

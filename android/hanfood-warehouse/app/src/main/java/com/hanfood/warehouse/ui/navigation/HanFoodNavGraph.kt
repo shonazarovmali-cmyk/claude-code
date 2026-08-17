@@ -1,22 +1,18 @@
 package com.hanfood.warehouse.ui.navigation
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Assessment
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.ReceiptLong
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
@@ -29,6 +25,9 @@ import com.hanfood.warehouse.HanFoodApp
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.security.BiometricHelper
+import com.hanfood.warehouse.ui.components.BrandHeader
+import com.hanfood.warehouse.ui.components.TopTab
+import com.hanfood.warehouse.ui.components.TopTabMenu
 import com.hanfood.warehouse.ui.screens.assistant.AiAssistantScreen
 import com.hanfood.warehouse.ui.screens.auth.PinSetupScreen
 import com.hanfood.warehouse.ui.screens.auth.PinUnlockScreen
@@ -42,17 +41,16 @@ import com.hanfood.warehouse.ui.screens.products.ProductListScreen
 import com.hanfood.warehouse.ui.screens.reports.ReportsScreen
 import com.hanfood.warehouse.ui.screens.scanner.BarcodeScannerScreen
 import com.hanfood.warehouse.ui.screens.settings.SettingsScreen
+import com.hanfood.warehouse.ui.screens.splash.SplashScreen
 import com.hanfood.warehouse.ui.screens.stock.MovementScreen
 
-private data class BottomTab(val route: String, val label: String, val icon: ImageVector)
-
 @Composable
-private fun rememberBottomTabs(): List<BottomTab> = listOf(
-    BottomTab(Routes.DASHBOARD, stringResource(R.string.tab_dashboard), Icons.Filled.Home),
-    BottomTab(Routes.PRODUCTS, stringResource(R.string.tab_products), Icons.Filled.Inventory),
-    BottomTab(Routes.CLIENTS, stringResource(R.string.tab_clients), Icons.Filled.Groups),
-    BottomTab(Routes.INVOICES, stringResource(R.string.tab_invoices), Icons.Filled.ReceiptLong),
-    BottomTab(Routes.REPORTS, stringResource(R.string.tab_reports), Icons.Filled.Assessment)
+private fun rememberTopTabs(): List<TopTab> = listOf(
+    TopTab(Routes.DASHBOARD, stringResource(R.string.tab_dashboard), Icons.Filled.Home),
+    TopTab(Routes.PRODUCTS, stringResource(R.string.tab_products), Icons.Filled.Inventory),
+    TopTab(Routes.CLIENTS, stringResource(R.string.tab_clients), Icons.Filled.Groups),
+    TopTab(Routes.INVOICES, stringResource(R.string.tab_invoices), Icons.Filled.ReceiptLong),
+    TopTab(Routes.REPORTS, stringResource(R.string.tab_reports), Icons.Filled.Assessment)
 )
 
 @Composable
@@ -61,16 +59,21 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
     val repository = app.repository
     val pinManager = app.pinManager
     val aiEngine = app.aiEngine
-    val bottomTabs = rememberBottomTabs()
+    val topTabs = rememberTopTabs()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
-    val showBottomBar = bottomTabs.any { it.route == currentRoute }
-
-    val startDestination = if (pinManager.isPinSet()) Routes.PIN_UNLOCK else Routes.PIN_SETUP
+    val showTopTabs = topTabs.any { it.route == currentRoute }
 
     fun goToDashboardClearingBackstack() {
         navController.navigate(Routes.DASHBOARD) {
+            popUpTo(0) { inclusive = true }
+        }
+    }
+
+    fun goToAuthClearingBackstack() {
+        val destination = if (pinManager.isPinSet()) Routes.PIN_UNLOCK else Routes.PIN_SETUP
+        navController.navigate(destination) {
             popUpTo(0) { inclusive = true }
         }
     }
@@ -80,32 +83,39 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
     val cancelLabel = stringResource(R.string.action_cancel)
 
     Scaffold(
-        bottomBar = {
-            if (showBottomBar) {
-                NavigationBar {
-                    bottomTabs.forEach { tab ->
-                        NavigationBarItem(
-                            selected = currentRoute == tab.route,
-                            onClick = {
-                                navController.navigate(tab.route) {
-                                    popUpTo(Routes.DASHBOARD) { saveState = true }
-                                    launchSingleTop = true
-                                    restoreState = true
-                                }
-                            },
-                            icon = { Icon(tab.icon, contentDescription = tab.label) },
-                            label = { Text(tab.label) }
-                        )
-                    }
+        topBar = {
+            if (showTopTabs) {
+                Column {
+                    BrandHeader(
+                        title = appName,
+                        trailingIcon = Icons.Filled.Settings,
+                        trailingContentDescription = stringResource(R.string.cd_settings),
+                        onTrailingClick = { navController.navigate(Routes.SETTINGS) }
+                    )
+                    TopTabMenu(
+                        tabs = topTabs,
+                        currentRoute = currentRoute,
+                        onSelect = { route ->
+                            navController.navigate(route) {
+                                popUpTo(Routes.DASHBOARD) { saveState = true }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }
+                    )
                 }
             }
         }
     ) { outerPadding ->
         NavHost(
             navController = navController,
-            startDestination = startDestination,
+            startDestination = Routes.SPLASH,
             modifier = Modifier.padding(outerPadding)
         ) {
+            composable(Routes.SPLASH) {
+                SplashScreen(onFinished = { goToAuthClearingBackstack() })
+            }
+
             composable(Routes.PIN_SETUP) {
                 PinSetupScreen(pinManager = pinManager, onDone = { goToDashboardClearingBackstack() })
             }
@@ -134,7 +144,6 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
                     onQuickAction = { type -> navController.navigate(Routes.movement(type)) },
                     onScanner = { navController.navigate(Routes.SCANNER) },
                     onAssistant = { navController.navigate(Routes.ASSISTANT) },
-                    onSettings = { navController.navigate(Routes.SETTINGS) },
                     onOpenInvoice = { id -> navController.navigate(Routes.invoiceDetail(id)) }
                 )
             }

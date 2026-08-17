@@ -30,7 +30,7 @@ fun BackTopBar(
     actions: @Composable () -> Unit = {}
 ) {
     CenterAlignedTopAppBar(
-        title = { Text(title, fontWeight = FontWeight.SemiBold) },
+        title = { Text(title, style = MaterialTheme.typography.titleLarge, fontWeight = FontWeight.SemiBold) },
         navigationIcon = {
             IconButton(onClick = onBack) {
                 Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_back))

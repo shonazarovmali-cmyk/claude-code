@@ -190,4 +190,13 @@
     <string name="settings_language_system">Як у системі</string>
     <string name="settings_language_dialog_title">Оберіть мову</string>
     <string name="action_close">Закрити</string>
+    <string name="product_photo_add">Додати фото</string>
+    <string name="product_photo_change">Змінити фото</string>
+    <string name="product_photo_remove">Видалити</string>
+    <string name="cd_product_photo">Фото товару</string>
+    <string name="invoice_title_field">Назва накладної (необов\'язково)</string>
+    <string name="invoice_attach_file">Прикріпити файл/фото</string>
+    <string name="invoice_attachments_label">Вкладення</string>
+    <string name="cd_attachment_remove">Видалити вкладення</string>
+    <string name="cd_open_attachment">Відкрити вкладення</string>
 </resources>

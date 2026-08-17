@@ -190,4 +190,13 @@
     <string name="settings_language_system">Как в системе</string>
     <string name="settings_language_dialog_title">Выберите язык</string>
     <string name="action_close">Закрыть</string>
+    <string name="product_photo_add">Добавить фото</string>
+    <string name="product_photo_change">Изменить фото</string>
+    <string name="product_photo_remove">Удалить</string>
+    <string name="cd_product_photo">Фото товара</string>
+    <string name="invoice_title_field">Название накладной (необязательно)</string>
+    <string name="invoice_attach_file">Прикрепить файл/фото</string>
+    <string name="invoice_attachments_label">Вложения</string>
+    <string name="cd_attachment_remove">Удалить вложение</string>
+    <string name="cd_open_attachment">Открыть вложение</string>
 </resources>

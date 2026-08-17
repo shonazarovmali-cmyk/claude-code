@@ -1,20 +1,30 @@
 package com.hanfood.warehouse.ui.screens.products
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -22,16 +32,28 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.ui.navigation.ScannerBus
+import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @Composable
 fun ProductEditScreen(
@@ -46,6 +68,17 @@ fun ProductEditScreen(
     )
     val state by viewModel.state.collectAsState()
     val scanned by ScannerBus.lastScanned.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val path = withContext(Dispatchers.IO) { FileStorage.saveProductImage(context, uri) }
+                if (path != null) viewModel.applyPickedImage(path)
+            }
+        }
+    }
 
     LaunchedEffect(scanned) {
         scanned?.let {
@@ -73,6 +106,12 @@ fun ProductEditScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            ProductPhotoPicker(
+                imagePath = state.imagePath,
+                onPick = { imagePicker.launch("image/*") },
+                onRemove = { viewModel.clearImage() }
+            )
+
             OutlinedTextField(
                 value = state.name,
                 onValueChange = { v -> viewModel.update { it.copy(name = v) } },
@@ -155,6 +194,65 @@ fun ProductEditScreen(
 
             Button(onClick = { viewModel.save() }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.action_save))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProductPhotoPicker(
+    imagePath: String?,
+    onPick: () -> Unit,
+    onRemove: () -> Unit
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(160.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+    ) {
+        if (imagePath != null) {
+            AsyncImage(
+                model = File(imagePath),
+                contentDescription = stringResource(R.string.cd_product_photo),
+                contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxWidth().fillMaxSize()
+            )
+            IconButton(
+                onClick = onRemove,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(6.dp)
+                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), RoundedCornerShape(50))
+            ) {
+                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.product_photo_remove))
+            }
+            OutlinedButton(
+                onClick = onPick,
+                modifier = Modifier.align(Alignment.BottomCenter).padding(10.dp)
+            ) {
+                Text(stringResource(R.string.product_photo_change))
+            }
+        } else {
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                IconButton(onClick = onPick, modifier = Modifier.size(48.dp)) {
+                    Icon(
+                        Icons.Filled.AddAPhoto,
+                        contentDescription = stringResource(R.string.cd_product_photo),
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(32.dp)
+                    )
+                }
+                Text(
+                    stringResource(R.string.product_photo_add),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
     }

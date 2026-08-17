@@ -1,5 +1,8 @@
 package com.hanfood.warehouse.ui.screens.stock
 
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,12 +13,17 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AttachFile
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.InsertDriveFile
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
@@ -42,11 +50,15 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.repository.CartLine
@@ -54,10 +66,14 @@ import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.ui.components.movementScreenTitle
 import com.hanfood.warehouse.ui.navigation.ScannerBus
+import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.UiMessage
 import com.hanfood.warehouse.util.formatMoney
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @Composable
 fun MovementScreen(
@@ -75,9 +91,19 @@ fun MovementScreen(
     val scanned by ScannerBus.lastScanned.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
     var showProductPicker by remember { mutableStateOf(false) }
     var showClientPicker by remember { mutableStateOf(false) }
+
+    val attachmentPicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+        if (uri != null) {
+            scope.launch {
+                val path = withContext(Dispatchers.IO) { FileStorage.saveInvoiceAttachment(context, uri) }
+                if (path != null) viewModel.addAttachment(path)
+            }
+        }
+    }
 
     LaunchedEffect(scanned) {
         scanned?.let {
@@ -157,11 +183,36 @@ fun MovementScreen(
 
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(10.dp)) {
                 OutlinedTextField(
+                    value = state.title,
+                    onValueChange = viewModel::setTitle,
+                    label = { Text(stringResource(R.string.invoice_title_field)) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true
+                )
+                OutlinedTextField(
                     value = state.note,
                     onValueChange = viewModel::setNote,
                     label = { Text(stringResource(R.string.movement_field_note)) },
                     modifier = Modifier.fillMaxWidth()
                 )
+
+                OutlinedButton(onClick = { attachmentPicker.launch("*/*") }, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.AttachFile, contentDescription = null)
+                    Text("  " + stringResource(R.string.invoice_attach_file))
+                }
+                if (state.attachments.isNotEmpty()) {
+                    Text(
+                        stringResource(R.string.invoice_attachments_label),
+                        style = MaterialTheme.typography.labelMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                        items(state.attachments, key = { it }) { path ->
+                            AttachmentThumbnail(path = path, onRemove = { viewModel.removeAttachment(path) })
+                        }
+                    }
+                }
+
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
                     Text(stringResource(R.string.movement_total_label), style = MaterialTheme.typography.titleMedium)
                     Text(formatMoney(state.total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
@@ -207,6 +258,46 @@ fun MovementScreen(
 
 @Composable
 private fun resolveMessage(message: UiMessage): String = stringResource(message.res, *message.args.toTypedArray())
+
+private val imageExtensions = setOf("jpg", "jpeg", "png", "webp")
+
+@Composable
+private fun AttachmentThumbnail(path: String, onRemove: () -> Unit) {
+    val isImage = File(path).extension.lowercase() in imageExtensions
+    Box(modifier = Modifier.size(64.dp)) {
+        Box(
+            modifier = Modifier
+                .size(64.dp)
+                .clip(RoundedCornerShape(10.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isImage) {
+                AsyncImage(
+                    model = File(path),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(Icons.Filled.InsertDriveFile, contentDescription = stringResource(R.string.cd_open_attachment))
+            }
+        }
+        IconButton(
+            onClick = onRemove,
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .size(22.dp)
+                .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), RoundedCornerShape(50))
+        ) {
+            Icon(
+                Icons.Filled.Close,
+                contentDescription = stringResource(R.string.cd_attachment_remove),
+                modifier = Modifier.size(14.dp)
+            )
+        }
+    }
+}
 
 @Composable
 private fun CartLineRow(

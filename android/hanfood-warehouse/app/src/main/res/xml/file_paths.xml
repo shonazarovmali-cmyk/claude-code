@@ -2,4 +2,6 @@
 <paths>
     <cache-path name="invoices" path="invoices/" />
     <cache-path name="exports" path="exports/" />
+    <files-path name="product_images" path="product_images/" />
+    <files-path name="invoice_attachments" path="invoice_attachments/" />
 </paths>

@@ -47,10 +47,8 @@ fun ReportsScreen(repository: WarehouseRepository) {
     val viewModel: ReportsViewModel = viewModel(factory = GenericViewModelFactory { ReportsViewModel(repository) })
     val state by viewModel.state.collectAsStateWithLifecycle()
 
-    Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.reports_title), fontWeight = FontWeight.Bold) }) }
-    ) { padding ->
-        Column(modifier = Modifier.fillMaxSize().padding(padding)) {
+    run {
+        Column(modifier = Modifier.fillMaxSize()) {
             LazyRow(
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)

@@ -2,6 +2,7 @@ package com.hanfood.warehouse.ui.navigation
 
 /** Ilovadagi barcha ekranlarning marshrutlari (navigation routes) bitta joyda. */
 object Routes {
+    const val SPLASH = "splash"
     const val PIN_UNLOCK = "pin_unlock"
     const val PIN_SETUP = "pin_setup"
 

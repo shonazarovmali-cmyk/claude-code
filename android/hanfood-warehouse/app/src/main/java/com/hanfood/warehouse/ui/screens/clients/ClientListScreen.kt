@@ -48,7 +48,6 @@ fun ClientListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.clients_title), fontWeight = FontWeight.Bold) }) },
         floatingActionButton = {
             ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text(stringResource(R.string.clients_add)) })
         }
