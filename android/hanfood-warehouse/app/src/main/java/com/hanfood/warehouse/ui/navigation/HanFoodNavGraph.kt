@@ -32,6 +32,7 @@ import com.hanfood.warehouse.ui.screens.auth.PinSetupScreen
 import com.hanfood.warehouse.ui.screens.auth.PinUnlockScreen
 import com.hanfood.warehouse.ui.screens.clients.ClientEditScreen
 import com.hanfood.warehouse.ui.screens.clients.ClientListScreen
+import com.hanfood.warehouse.ui.screens.clients.LocationPickerScreen
 import com.hanfood.warehouse.ui.screens.dashboard.DashboardScreen
 import com.hanfood.warehouse.ui.screens.invoices.InvoiceDetailScreen
 import com.hanfood.warehouse.ui.screens.invoices.InvoiceListScreen
@@ -182,8 +183,13 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
                 ClientEditScreen(
                     repository = repository,
                     clientId = if (id <= 0) 0L else id,
-                    onBack = { navController.popBackStack() }
+                    onBack = { navController.popBackStack() },
+                    onPickOnMap = { navController.navigate(Routes.LOCATION_PICKER) }
                 )
+            }
+
+            composable(Routes.LOCATION_PICKER) {
+                LocationPickerScreen(onBack = { navController.popBackStack() })
             }
 
             composable(Routes.INVOICES) {

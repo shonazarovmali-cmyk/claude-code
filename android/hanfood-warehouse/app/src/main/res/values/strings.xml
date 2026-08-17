@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">%1$d product(s) running low — check the Reports section</string>
     <string name="dashboard_quick_actions">Quick actions</string>
     <string name="dashboard_recent_transactions">Recent transactions</string>
+    <string name="dashboard_top_products_title">Top-selling products</string>
+    <string name="dashboard_top_products_sold">%1$s %2$s sold</string>
     <string name="dashboard_no_transactions_yet">No transactions recorded yet</string>
     <string name="quick_action_stock_in">Receive stock</string>
     <string name="quick_action_stock_out">Give goods</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Location permission was not granted</string>
     <string name="error_location_unavailable">Couldn’t determine the location</string>
     <string name="client_location_saved">Location saved</string>
+    <string name="location_picker_title">Mark location on map</string>
+    <string name="location_picker_hint">Move the map so the pin sits over the right spot, then confirm</string>
+    <string name="action_confirm_location">Confirm this location</string>
+    <string name="action_pick_on_map">Mark on map</string>
+    <string name="action_adjust_on_map">Adjust</string>
+    <string name="action_find_on_map">Find on map</string>
+    <string name="client_address_geocode_hint">Tap the search icon to find this address on the map</string>
+    <string name="error_geocode_not_found">Couldn’t find this address on the map</string>
     <string name="error_client_name_required">Enter a client name</string>
     <string name="error_client_not_found">Client not found</string>
     <string name="cd_close">Close</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Reports</string>
     <string name="biometric_prompt_subtitle">Verify your fingerprint to continue</string>
     <string name="action_cancel">Cancel</string>
+    <string name="action_ok">OK</string>
+    <string name="action_import_excel">Import from Excel</string>
+    <string name="excel_import_in_progress">Importing</string>
+    <string name="excel_import_in_progress_body">Reading the spreadsheet and adding it to the warehouse…</string>
+    <string name="excel_import_failed_title">Import failed</string>
+    <string name="excel_import_failed_body">Couldn\'t read this file. Make sure it\'s a valid .xlsx spreadsheet with columns: name, barcode, unit, quantity, min quantity, purchase price, sell price (first row is the header).</string>
+    <string name="excel_import_done_title">Import complete</string>
+    <string name="excel_import_done_body">New products: %1$d
+Existing products updated: %2$d
+Stock lines added: %3$d
+
+Everything was recorded as one stock-in invoice.</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_delete_product">Delete product</string>
+    <string name="action_delete_client">Delete client</string>
+    <string name="action_delete_invoice">Delete invoice</string>
+    <string name="confirm_delete_product_title">Delete this product?</string>
+    <string name="confirm_delete_product_message">It will be hidden from the product list. Its history stays in past invoices/reports.</string>
+    <string name="confirm_delete_client_title">Delete this client?</string>
+    <string name="confirm_delete_client_message">It will be hidden from the client list. Its history stays in past invoices/reports.</string>
+    <string name="confirm_delete_invoice_title">Delete this invoice?</string>
+    <string name="confirm_delete_invoice_message">This can\'t be undone. The product quantity it affected will be reversed.</string>
     <string name="settings_title">Settings</string>
     <string name="settings_section_security">Security</string>
     <string name="settings_change_pin">Change PIN</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Choose a language</string>
     <string name="action_close">Close</string>
     <string name="product_photo_add">Add photo</string>
-    <string name="product_photo_change">Change photo</string>
+    <string name="product_photo_count">Photos: %1$d of %2$d</string>
     <string name="product_photo_remove">Remove</string>
     <string name="cd_product_photo">Product photo</string>
     <string name="invoice_title_field">Invoice name (optional)</string>

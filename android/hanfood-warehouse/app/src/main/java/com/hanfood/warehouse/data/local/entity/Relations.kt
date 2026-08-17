@@ -13,12 +13,16 @@ data class TransactionItemDetail(
     val lineTotal: Double get() = quantity * unitPrice
 }
 
-/** Bitta mahsulot bo'yicha davr ichidagi kirim/chiqim/qaytarish yig'indisi (hisobotlar uchun). */
+/**
+ * Bitta mahsulot bo'yicha davr ichidagi kirim/chiqim/qaytarish yig'indisi
+ * (hisobotlar va bosh sahifadagi "eng aktiv tovarlar" banneri uchun).
+ */
 data class ProductMovementSummary(
     val productId: Long,
     val productName: String,
     val unit: String,
-    val totalQuantity: Double
+    val totalQuantity: Double,
+    val imagePaths: String? = null
 )
 
 /** Mijoz bo'yicha yig'indi statistika (eng faol mijozlar hisoboti uchun). */

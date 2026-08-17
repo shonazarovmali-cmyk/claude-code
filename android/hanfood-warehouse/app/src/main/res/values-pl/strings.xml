@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">Kończy się %1$d produkt(ów) — sprawdź sekcję Raporty</string>
     <string name="dashboard_quick_actions">Szybkie akcje</string>
     <string name="dashboard_recent_transactions">Ostatnie operacje</string>
+    <string name="dashboard_top_products_title">Najlepiej sprzedające się produkty</string>
+    <string name="dashboard_top_products_sold">sprzedano %1$s %2$s</string>
     <string name="dashboard_no_transactions_yet">Nie zarejestrowano jeszcze żadnych operacji</string>
     <string name="quick_action_stock_in">Przyjęcie towaru</string>
     <string name="quick_action_stock_out">Wydaj towar</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Nie udzielono uprawnienia do lokalizacji</string>
     <string name="error_location_unavailable">Nie udało się ustalić lokalizacji</string>
     <string name="client_location_saved">Lokalizacja zapisana</string>
+    <string name="location_picker_title">Zaznacz na mapie</string>
+    <string name="location_picker_hint">Przesuń mapę tak, aby pinezka znalazła się we właściwym miejscu, a następnie potwierdź</string>
+    <string name="action_confirm_location">Potwierdź to miejsce</string>
+    <string name="action_pick_on_map">Zaznacz na mapie</string>
+    <string name="action_adjust_on_map">Zmień</string>
+    <string name="action_find_on_map">Znajdź na mapie</string>
+    <string name="client_address_geocode_hint">Stuknij ikonę wyszukiwania, aby znaleźć ten adres na mapie</string>
+    <string name="error_geocode_not_found">Nie znaleziono tego adresu na mapie</string>
     <string name="error_client_name_required">Podaj nazwę klienta</string>
     <string name="error_client_not_found">Nie znaleziono klienta</string>
     <string name="cd_close">Zamknij</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Raporty</string>
     <string name="biometric_prompt_subtitle">Zweryfikuj odcisk palca, aby kontynuować</string>
     <string name="action_cancel">Anuluj</string>
+    <string name="action_ok">OK</string>
+    <string name="action_import_excel">Importuj z Excela</string>
+    <string name="excel_import_in_progress">Importowanie</string>
+    <string name="excel_import_in_progress_body">Odczytywanie arkusza i dodawanie do magazynu…</string>
+    <string name="excel_import_failed_title">Import nie powiódł się</string>
+    <string name="excel_import_failed_body">Nie udało się odczytać tego pliku. Upewnij się, że to prawidłowy arkusz .xlsx z kolumnami: nazwa, kod kreskowy, jednostka, ilość, minimalny stan, cena zakupu, cena sprzedaży (pierwszy wiersz to nagłówek).</string>
+    <string name="excel_import_done_title">Import zakończony</string>
+    <string name="excel_import_done_body">Nowe produkty: %1$d
+Zaktualizowano istniejących: %2$d
+Dodane pozycje: %3$d
+
+Wszystko zapisano jako jeden dokument przyjęcia.</string>
+    <string name="action_delete">Usuń</string>
+    <string name="action_delete_product">Usuń produkt</string>
+    <string name="action_delete_client">Usuń klienta</string>
+    <string name="action_delete_invoice">Usuń dokument</string>
+    <string name="confirm_delete_product_title">Usunąć ten produkt?</string>
+    <string name="confirm_delete_product_message">Zostanie ukryty z listy produktów. Historia w poprzednich dokumentach i raportach zostanie zachowana.</string>
+    <string name="confirm_delete_client_title">Usunąć tego klienta?</string>
+    <string name="confirm_delete_client_message">Zostanie ukryty z listy klientów. Historia w poprzednich dokumentach i raportach zostanie zachowana.</string>
+    <string name="confirm_delete_invoice_title">Usunąć ten dokument?</string>
+    <string name="confirm_delete_invoice_message">Tej czynności nie można cofnąć. Wpływ dokumentu na stan produktu zostanie cofnięty.</string>
     <string name="settings_title">Ustawienia</string>
     <string name="settings_section_security">Bezpieczeństwo</string>
     <string name="settings_change_pin">Zmień kod PIN</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Wybierz język</string>
     <string name="action_close">Zamknij</string>
     <string name="product_photo_add">Dodaj zdjęcie</string>
-    <string name="product_photo_change">Zmień zdjęcie</string>
+    <string name="product_photo_count">Zdjęcia: %1$d z %2$d</string>
     <string name="product_photo_remove">Usuń</string>
     <string name="cd_product_photo">Zdjęcie produktu</string>
     <string name="invoice_title_field">Nazwa dokumentu (opcjonalnie)</string>

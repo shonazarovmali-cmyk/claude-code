@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">%1$d Produkt(e) werden knapp — siehe Bereich „Berichte“</string>
     <string name="dashboard_quick_actions">Schnellaktionen</string>
     <string name="dashboard_recent_transactions">Letzte Vorgänge</string>
+    <string name="dashboard_top_products_title">Meistverkaufte Produkte</string>
+    <string name="dashboard_top_products_sold">%1$s %2$s verkauft</string>
     <string name="dashboard_no_transactions_yet">Bisher wurden keine Vorgänge erfasst</string>
     <string name="quick_action_stock_in">Wareneingang</string>
     <string name="quick_action_stock_out">Ware ausgeben</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Standortberechtigung wurde nicht erteilt</string>
     <string name="error_location_unavailable">Standort konnte nicht ermittelt werden</string>
     <string name="client_location_saved">Standort gespeichert</string>
+    <string name="location_picker_title">Auf der Karte markieren</string>
+    <string name="location_picker_hint">Karte verschieben, bis die Nadel an der richtigen Stelle steht, dann bestätigen</string>
+    <string name="action_confirm_location">Diesen Standort bestätigen</string>
+    <string name="action_pick_on_map">Auf der Karte markieren</string>
+    <string name="action_adjust_on_map">Ändern</string>
+    <string name="action_find_on_map">Auf der Karte suchen</string>
+    <string name="client_address_geocode_hint">Tippen Sie auf das Suchsymbol, um diese Adresse auf der Karte zu finden</string>
+    <string name="error_geocode_not_found">Diese Adresse konnte auf der Karte nicht gefunden werden</string>
     <string name="error_client_name_required">Geben Sie einen Kundennamen ein</string>
     <string name="error_client_not_found">Kunde nicht gefunden</string>
     <string name="cd_close">Schließen</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Berichte</string>
     <string name="biometric_prompt_subtitle">Bestätigen Sie Ihren Fingerabdruck, um fortzufahren</string>
     <string name="action_cancel">Abbrechen</string>
+    <string name="action_ok">OK</string>
+    <string name="action_import_excel">Aus Excel importieren</string>
+    <string name="excel_import_in_progress">Importieren</string>
+    <string name="excel_import_in_progress_body">Tabelle wird gelesen und ins Lager übernommen…</string>
+    <string name="excel_import_failed_title">Import fehlgeschlagen</string>
+    <string name="excel_import_failed_body">Diese Datei konnte nicht gelesen werden. Stellen Sie sicher, dass es eine gültige .xlsx-Tabelle mit den Spalten ist: Name, Barcode, Einheit, Menge, Mindestbestand, Einkaufspreis, Verkaufspreis (erste Zeile ist die Kopfzeile).</string>
+    <string name="excel_import_done_title">Import abgeschlossen</string>
+    <string name="excel_import_done_body">Neue Produkte: %1$d
+Aktualisierte Produkte: %2$d
+Hinzugefügte Positionen: %3$d
+
+Alles wurde als ein Wareneingangsbeleg erfasst.</string>
+    <string name="action_delete">Löschen</string>
+    <string name="action_delete_product">Produkt löschen</string>
+    <string name="action_delete_client">Kunden löschen</string>
+    <string name="action_delete_invoice">Beleg löschen</string>
+    <string name="confirm_delete_product_title">Dieses Produkt löschen?</string>
+    <string name="confirm_delete_product_message">Es wird aus der Produktliste ausgeblendet. Der Verlauf in früheren Belegen/Berichten bleibt erhalten.</string>
+    <string name="confirm_delete_client_title">Diesen Kunden löschen?</string>
+    <string name="confirm_delete_client_message">Er wird aus der Kundenliste ausgeblendet. Der Verlauf in früheren Belegen/Berichten bleibt erhalten.</string>
+    <string name="confirm_delete_invoice_title">Diesen Beleg löschen?</string>
+    <string name="confirm_delete_invoice_message">Dies kann nicht rückgängig gemacht werden. Die Auswirkung des Belegs auf den Produktbestand wird rückgängig gemacht.</string>
     <string name="settings_title">Einstellungen</string>
     <string name="settings_section_security">Sicherheit</string>
     <string name="settings_change_pin">PIN-Code ändern</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Sprache auswählen</string>
     <string name="action_close">Schließen</string>
     <string name="product_photo_add">Foto hinzufügen</string>
-    <string name="product_photo_change">Foto ändern</string>
+    <string name="product_photo_count">Fotos: %1$d von %2$d</string>
     <string name="product_photo_remove">Entfernen</string>
     <string name="cd_product_photo">Produktfoto</string>
     <string name="invoice_title_field">Belegname (optional)</string>

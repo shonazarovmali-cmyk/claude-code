@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">%1$d ürün azalıyor — Raporlar bölümüne bakın</string>
     <string name="dashboard_quick_actions">Hızlı işlemler</string>
     <string name="dashboard_recent_transactions">Son işlemler</string>
+    <string name="dashboard_top_products_title">En çok satan ürünler</string>
+    <string name="dashboard_top_products_sold">%1$s %2$s satıldı</string>
     <string name="dashboard_no_transactions_yet">Henüz kaydedilmiş bir işlem yok</string>
     <string name="quick_action_stock_in">Stok girişi</string>
     <string name="quick_action_stock_out">Ürün ver</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Konum izni verilmedi</string>
     <string name="error_location_unavailable">Konum belirlenemedi</string>
     <string name="client_location_saved">Konum kaydedildi</string>
+    <string name="location_picker_title">Haritada işaretle</string>
+    <string name="location_picker_hint">İğne doğru noktaya gelene kadar haritayı hareket ettirin, sonra onaylayın</string>
+    <string name="action_confirm_location">Bu konumu onayla</string>
+    <string name="action_pick_on_map">Haritadan işaretle</string>
+    <string name="action_adjust_on_map">Değiştir</string>
+    <string name="action_find_on_map">Haritada bul</string>
+    <string name="client_address_geocode_hint">Bu adresi haritada bulmak için arama simgesine dokunun</string>
+    <string name="error_geocode_not_found">Bu adres haritada bulunamadı</string>
     <string name="error_client_name_required">Bir müşteri adı girin</string>
     <string name="error_client_not_found">Müşteri bulunamadı</string>
     <string name="cd_close">Kapat</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Raporlar</string>
     <string name="biometric_prompt_subtitle">Devam etmek için parmak izinizi doğrulayın</string>
     <string name="action_cancel">İptal</string>
+    <string name="action_ok">Tamam</string>
+    <string name="action_import_excel">Excel\'den içe aktar</string>
+    <string name="excel_import_in_progress">İçe aktarılıyor</string>
+    <string name="excel_import_in_progress_body">Tablo okunuyor ve depoya ekleniyor…</string>
+    <string name="excel_import_failed_title">İçe aktarma başarısız</string>
+    <string name="excel_import_failed_body">Bu dosya okunamadı. Geçerli bir .xlsx dosyası olduğundan ve sütunların şu sırada olduğundan emin olun: ad, barkod, birim, miktar, minimum stok, alış fiyatı, satış fiyatı (ilk satır başlıktır).</string>
+    <string name="excel_import_done_title">İçe aktarma tamamlandı</string>
+    <string name="excel_import_done_body">Yeni ürünler: %1$d
+Güncellenen mevcut ürünler: %2$d
+Eklenen satırlar: %3$d
+
+Her şey tek bir stok girişi faturası olarak kaydedildi.</string>
+    <string name="action_delete">Sil</string>
+    <string name="action_delete_product">Ürünü sil</string>
+    <string name="action_delete_client">Müşteriyi sil</string>
+    <string name="action_delete_invoice">Faturayı sil</string>
+    <string name="confirm_delete_product_title">Bu ürün silinsin mi?</string>
+    <string name="confirm_delete_product_message">Ürün listesinden gizlenecek. Geçmiş faturalardaki/raporlardaki geçmişi korunur.</string>
+    <string name="confirm_delete_client_title">Bu müşteri silinsin mi?</string>
+    <string name="confirm_delete_client_message">Müşteri listesinden gizlenecek. Geçmiş faturalardaki/raporlardaki geçmişi korunur.</string>
+    <string name="confirm_delete_invoice_title">Bu fatura silinsin mi?</string>
+    <string name="confirm_delete_invoice_message">Bu işlem geri alınamaz. Faturanın ürün stoğuna etkisi geri alınacak.</string>
     <string name="settings_title">Ayarlar</string>
     <string name="settings_section_security">Güvenlik</string>
     <string name="settings_change_pin">PIN kodunu değiştir</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Bir dil seçin</string>
     <string name="action_close">Kapat</string>
     <string name="product_photo_add">Fotoğraf ekle</string>
-    <string name="product_photo_change">Fotoğrafı değiştir</string>
+    <string name="product_photo_count">Fotoğraflar: %2$d üzerinden %1$d</string>
     <string name="product_photo_remove">Kaldır</string>
     <string name="cd_product_photo">Ürün fotoğrafı</string>
     <string name="invoice_title_field">Fatura adı (isteğe bağlı)</string>

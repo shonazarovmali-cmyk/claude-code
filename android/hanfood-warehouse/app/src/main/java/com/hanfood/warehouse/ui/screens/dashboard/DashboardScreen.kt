@@ -1,13 +1,18 @@
 package com.hanfood.warehouse.ui.screens.dashboard
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
@@ -18,6 +23,7 @@ import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Inventory
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.LocalShipping
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material.icons.filled.Scale
@@ -30,19 +36,27 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
+import com.hanfood.warehouse.data.local.entity.ProductMovementSummary
 import com.hanfood.warehouse.data.local.entity.StockTransaction
+import com.hanfood.warehouse.data.local.entity.toAttachmentList
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.StatCard
 import com.hanfood.warehouse.ui.components.transactionTypeLabel
 import com.hanfood.warehouse.ui.theme.BrandGold
+import com.hanfood.warehouse.ui.theme.BrandGreen
+import com.hanfood.warehouse.ui.theme.BrandGreenLight
 import com.hanfood.warehouse.ui.theme.BrandNavy
 import com.hanfood.warehouse.ui.theme.BrandTeal
 import com.hanfood.warehouse.ui.theme.SuccessGreen
@@ -50,6 +64,7 @@ import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.formatDateTime
 import com.hanfood.warehouse.util.formatMoney
 import com.hanfood.warehouse.util.formatQuantity
+import java.io.File
 
 @Composable
 fun DashboardScreen(
@@ -70,6 +85,10 @@ fun DashboardScreen(
 
         if (state.lowStock.isNotEmpty()) {
             item { LowStockBanner(count = state.lowStock.size) }
+        }
+
+        if (state.topProducts.isNotEmpty()) {
+            item { TopProductsPromo(state.topProducts) }
         }
 
         item {
@@ -161,6 +180,78 @@ private fun LowStockBanner(count: Int) {
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 style = MaterialTheme.typography.bodyMedium
             )
+        }
+    }
+}
+
+/**
+ * "Eng aktiv tovarlar" — oxirgi 30 kunda eng ko'p sotilgan mahsulotlar,
+ * bosh sahifada reklama/banner sifatida gorizontal surilib ko'rinadi.
+ */
+@Composable
+private fun TopProductsPromo(products: List<ProductMovementSummary>) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
+            Icon(Icons.Filled.LocalFireDepartment, contentDescription = null, tint = BrandGreen, modifier = Modifier.size(20.dp))
+            Text(
+                stringResource(R.string.dashboard_top_products_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+        LazyRow(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            items(products, key = { it.productId }) { product -> TopProductCard(product) }
+        }
+    }
+}
+
+@Composable
+private fun TopProductCard(product: ProductMovementSummary) {
+    val imagePath = product.imagePaths.toAttachmentList().firstOrNull()
+    Card(
+        modifier = Modifier.width(130.dp),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = BrandGreenLight)
+    ) {
+        Column {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .aspectRatio(1.2f)
+                    .clip(RoundedCornerShape(topStart = 16.dp, topEnd = 16.dp))
+                    .background(MaterialTheme.colorScheme.surface)
+            ) {
+                if (imagePath != null) {
+                    AsyncImage(
+                        model = File(imagePath),
+                        contentDescription = product.productName,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxWidth().aspectRatio(1.2f)
+                    )
+                } else {
+                    Icon(
+                        Icons.Filled.Inventory2,
+                        contentDescription = null,
+                        tint = BrandGreen,
+                        modifier = Modifier.size(36.dp).align(Alignment.Center)
+                    )
+                }
+            }
+            Column(modifier = Modifier.padding(10.dp)) {
+                Text(
+                    product.productName,
+                    style = MaterialTheme.typography.labelMedium,
+                    fontWeight = FontWeight.SemiBold,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+                Text(
+                    stringResource(R.string.dashboard_top_products_sold, formatQuantity(product.totalQuantity), product.unit),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = BrandGreen,
+                    fontWeight = FontWeight.Medium
+                )
+            }
         }
     }
 }

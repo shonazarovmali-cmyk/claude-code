@@ -27,7 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -45,6 +49,8 @@ import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.local.entity.toAttachmentList
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
+import com.hanfood.warehouse.ui.components.ConfirmDeleteDialog
+import com.hanfood.warehouse.ui.components.DeleteAction
 import com.hanfood.warehouse.ui.components.transactionTypeLabel
 import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
@@ -66,6 +72,11 @@ fun InvoiceDetailScreen(
     )
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val context = LocalContext.current
+    var showDeleteConfirm by remember { mutableStateOf(false) }
+
+    LaunchedEffect(state.deleted) {
+        if (state.deleted) onBack()
+    }
 
     val counterpartyLabelText = stringResource(
         if (state.counterpartyKind == CounterpartyKind.CLIENT) R.string.counterparty_label_client else R.string.counterparty_label_supplier
@@ -102,11 +113,27 @@ fun InvoiceDetailScreen(
                         }) {
                             Icon(Icons.Filled.Share, contentDescription = stringResource(R.string.action_share))
                         }
+                        DeleteAction(
+                            contentDescription = stringResource(R.string.action_delete_invoice),
+                            onClick = { showDeleteConfirm = true }
+                        )
                     }
                 }
             )
         }
     ) { padding ->
+        if (showDeleteConfirm) {
+            ConfirmDeleteDialog(
+                title = stringResource(R.string.confirm_delete_invoice_title),
+                message = stringResource(R.string.confirm_delete_invoice_message),
+                onConfirm = {
+                    showDeleteConfirm = false
+                    viewModel.delete()
+                },
+                onDismiss = { showDeleteConfirm = false }
+            )
+        }
+
         val tx = state.transaction
         if (tx == null) {
             Column(modifier = Modifier.fillMaxSize().padding(padding).padding(24.dp)) {

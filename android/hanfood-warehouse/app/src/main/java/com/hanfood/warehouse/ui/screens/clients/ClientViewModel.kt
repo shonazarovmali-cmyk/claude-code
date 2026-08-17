@@ -39,8 +39,10 @@ data class ClientEditUiState(
     val latitude: Double? = null,
     val longitude: Double? = null,
     val locating: Boolean = false,
+    val geocoding: Boolean = false,
     val loaded: Boolean = false,
     val saved: Boolean = false,
+    val deleted: Boolean = false,
     @StringRes val errorRes: Int? = null
 )
 
@@ -82,12 +84,25 @@ class ClientEditViewModel(
         _state.value = _state.value.copy(locating = value)
     }
 
+    fun setGeocoding(value: Boolean) {
+        _state.value = _state.value.copy(geocoding = value)
+    }
+
     fun setLocation(latitude: Double?, longitude: Double?) {
-        _state.value = _state.value.copy(latitude = latitude, longitude = longitude, locating = false)
+        _state.value = _state.value.copy(latitude = latitude, longitude = longitude, locating = false, geocoding = false)
     }
 
     fun clearLocation() {
         _state.value = _state.value.copy(latitude = null, longitude = null)
+    }
+
+    fun delete() {
+        if (clientId == 0L) return
+        viewModelScope.launch {
+            val client = repository.getClient(clientId) ?: return@launch
+            repository.archiveClient(client)
+            _state.value = _state.value.copy(deleted = true)
+        }
     }
 
     fun save() {

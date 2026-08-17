@@ -10,14 +10,26 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 
 ## Asosiy imkoniyatlar
 
-- **Mahsulotlar**: nomi, shtrix-kodi, **rasmi**, o'lchov birligi, joriy/minimal
-  qoldiq, tannarx va sotish narxi bilan boshqarish. Mahsulot qo'shishda
-  telefon galereyasidan rasm biriktirish mumkin, rasm ro'yxatda va tahrirlash
-  ekranida ko'rinadi.
-- **Mijozlar**: nomi, telefoni, manzili bilan mijozlar bazasi. Mijoz
-  qo'shishda **GPS joylashuvini olish** tugmasi bilan koordinatalarni
-  saqlash mumkin — keyin "Xaritada ko'rish" orqali Google Maps ilovasida
-  ochiladi (alohida Maps API kaliti/billing shart emas).
+- **Mahsulotlar**: nomi, shtrix-kodi, **bitta mahsulotga o'ntagacha rasm**,
+  o'lchov birligi, joriy/minimal qoldiq, tannarx va sotish narxi bilan
+  boshqarish. Rasmlar Instagram'dagi ko'p-rasmli post kabi utkazib-utkazib
+  ko'riladi (nuqta indikatorlar bilan), har birini alohida o'chirish mumkin.
+  Mahsulot va mijozlarni **o'chirish** mumkin (fakturalar/hisobotlardagi
+  tarixi buzilmasligi uchun ro'yxatdan yashiriladi).
+- **Mijozlar**: nomi, telefoni, manzili bilan mijozlar bazasi. Joylashuvni
+  uch xil usulda belgilash mumkin: **GPS joylashuvni olish** (qurilma
+  joriy koordinatasini avtomatik oladi), **xaritadan qo'lda belgilash**
+  (xaritani surib pinni kerakli nuqtaga qo'yish — OpenStreetMap asosida,
+  Google Maps API kaliti/billing shart emas) yoki **manzildan avtomatik
+  topish** (manzil maydoniga yozib qidiruv belgisini bosish — OpenStreetMap
+  Nominatim orqali, bepul). Saqlangan nuqta "Xaritada ko'rish" orqali
+  Google Maps ilovasida ochiladi.
+- **Excel'dan import**: Mahsulotlar bo'limida `.xlsx` jadval tanlab, undagi
+  qatorlarni (nomi, shtrix-kodi, o'lchov birligi, miqdori, minimal qoldiq,
+  tannarx, sotish narxi) avtomatik o'qib omborga qo'shadi — mavjud
+  mahsulotlar shtrix-kod/nomi bo'yicha topilib miqdori qo'shiladi, yangilari
+  yaratiladi, hammasi bitta kirim fakturasi sifatida yoziladi (summasi
+  avtomatik hisoblanadi).
 - **Kirim** — ta'minotchidan yuk qabul qilish (qoldiqqa qo'shiladi).
 - **Chiqim (yuk berish)** — mijozga yuk berish (qoldiqdan ayiriladi, yetarli
   bo'lmasa xatolik ko'rsatiladi).
@@ -30,7 +42,12 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   bosilganda ochiladi.
 - **Hisobotlar**: davr bo'yicha (bugun/hafta/oy/barcha vaqt) kirim-chiqim
   summasi, eng ko'p berilgan mahsulotlar, eng faol mijozlar, kam qolgan
-  mahsulotlar ro'yxati.
+  mahsulotlar ro'yxati. Bosh sahifada oxirgi 30 kunda **eng aktiv
+  (ko'p sotilgan) mahsulotlar** reklama-banner sifatida ko'rinadi.
+- **Fakturalarni o'chirish**: noto'g'ri kiritilgan kirim/chiqim/qaytarish
+  fakturasini butunlay o'chirish mumkin — mahsulot qoldig'iga qilgan
+  ta'siri avtomatik bekor qilinadi (kirim/qaytarish ayiriladi, chiqim
+  qaytariladi).
 - **Shtrix-kod/QR skaneri**: CameraX + ML Kit orqali telefon kamerasi bilan
   jonli skanerlash — mahsulot qo'shishda ham, faktura tuzishda ham
   ishlatiladi.
@@ -42,8 +59,8 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 - **Ko'p tillilik**: Ilova 7 tilda ishlaydi — **inglizcha, o'zbekcha, ruscha,
   polyakcha, turkcha, ukraincha va nemischa**. Til qurilma tiliga qarab
   avtomatik tanlanadi; Sozlamalar → Til bo'limidan qo'lda ham o'zgartirish
-  mumkin (ilovani qayta o'rnatmasdan, darhol qo'llanadi). AI Yordamchi ham
-  tanlangan tilda javob beradi.
+  mumkin — tanlash zahoti butun interfeysga qo'llanadi (ilovani qayta
+  o'rnatmasdan/ishga tushirmasdan).
 
 ## Dizayn / brend
 
@@ -65,20 +82,31 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   toza oq fonda, yetarlicha katta o'lchamda ko'rsatiladi (MoySklad CRM
   uslubidagi biznes-ilova ko'rinishi uchun qorong'i gradient banner o'rniga).
 - **Yuqori menyu**: navigatsiya pastki panel o'rniga ilovaning **tepasida**
-  joylashgan (`ui/components/TopTabMenu.kt`) — tanlangan bo'lim rangi
-  to'qlashadi (qalin, asosiy yashil rangda), boshqalari xira ko'rinadi.
+  joylashgan (`ui/components/TopTabMenu.kt`, `ScrollableTabRow` asosida —
+  har bir tab o'z matniga mos kenglikda, uzun so'zlar ikki qatorga
+  bo'linmaydi) — tanlangan bo'lim rangi to'qlashadi (qalin, asosiy yashil
+  rangda), boshqalari xira ko'rinadi.
 
 ## Texnologiyalar
 
-- Kotlin + Jetpack Compose (Material 3)
-- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` va `Migration(2,3)`
-  bilan (mahsulot rasmi, faktura nomi/biriktirmalar, mijoz GPS
-  koordinatalari ustunlari qo'shildi)
+- Kotlin + Jetpack Compose (Material 3), `HorizontalPager` — mahsulot
+  rasmlari galereyasi
+- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` → `Migration(3,4)`
+  bilan (mahsulot rasmlari — endi ro'yxat, faktura nomi/biriktirmalar,
+  mijoz GPS koordinatalari ustunlari qo'shildi)
 - CameraX + ML Kit Barcode Scanning
-- Coil — mahsulot rasmi va faktura biriktirmalarini ko'rsatish
+- Coil — mahsulot rasmlari va faktura biriktirmalarini ko'rsatish
 - Google Play Services — `FusedLocationProviderClient` (mijoz GPS
   joylashuvini olish uchun; alohida Maps API kaliti/billing shart emas —
   saqlangan nuqta oddiy `geo:` intent orqali Google Maps ilovasida ochiladi)
+- osmdroid (OpenStreetMap) — xaritadan qo'lda joylashuv belgilash ekrani;
+  Nominatim — manzildan avtomatik geokodlash. Ikkalasi ham bepul, API
+  kaliti/billing shart emas
+- Qo'lda yozilgan minimal `.xlsx` o'quvchi (`util/ExcelImporter.kt`,
+  `android.util.Xml` orqali) — Apache POI Android'da barqaror ishlamaydi,
+  fastexcel-reader esa Android'da mavjud bo'lmagan `javax.xml.stream`
+  (StAX) ga tayanadi va R8 bilan mos kelmadi, shu sabab kutubxonasiz
+  yechim tanlandi
 - Navigation Compose
 - EncryptedSharedPreferences + BiometricPrompt — xavfsizlik
 - `android.graphics.pdf` — tashqi kutubxonasiz PDF faktura yaratish
@@ -142,11 +170,36 @@ holda `InsufficientStockException` otiladi va hech narsa yozilmaydi.
   tanlaydi.
 - Til tanlash `util/LanguageManager.kt` orqali (`AppCompatDelegate.setApplicationLocales`)
   — Sozlamalar ekranidagi almashtirish darhol qo'llanadi, ilovani qayta
-  ishga tushirish shart emas.
+  ishga tushirish shart emas. **Muhim**: bu mexanizm faqat `AppCompatActivity`
+  turidagi Activity'larni kuzatib avtomatik qayta yaratadi (API < 33'da) —
+  shu sababdan `MainActivity` aynan `AppCompatActivity`dan meros oladi
+  (oddiy `FragmentActivity` bo'lganda til tanlansa ham UI yangilanmas edi).
 - Pul birligi — **złoty (zł)**. Barcha summalar ilova ichida shu valyutada
   ko'rsatiladi (raqamlar guruhlash formati polyakcha standartga mos: `1 250 000 zł`),
   UI tilidan qat'i nazar — xuddi boshqa ilovalarda "$" yoki "€" belgisi
   tarjima qilinmagani kabi, "zł" ham doim shunday qoladi.
+
+## Excel'dan import qilish formati
+
+Mahsulotlar ekranidagi yuklash tugmasi orqali tanlangan `.xlsx` faylning
+**birinchi varag'i** o'qiladi, **birinchi qator sarlavha** deb hisoblanib
+o'tkazib yuboriladi. Ustunlar tartibi (A dan G gacha):
+
+| Ustun | Maydon | Majburiymi | Standart qiymat |
+|---|---|---|---|
+| A | Nomi | Ha | — |
+| B | Shtrix-kod | Yo'q | (bo'sh) |
+| C | O'lchov birligi | Yo'q | `dona` |
+| D | Miqdor (kirim) | Yo'q | `0` |
+| E | Minimal qoldiq | Yo'q | `0` |
+| F | Tannarx | Yo'q | `0` |
+| G | Sotish narxi | Yo'q | `0` |
+
+Har bir qator uchun avval shtrix-kod (bo'lsa), keyin nomi bo'yicha mavjud
+mahsulot izlanadi — topilsa unga miqdor qo'shiladi, topilmasa yangi
+mahsulot yaratiladi. Barcha qatorlar **bitta kirim (STOCK_IN) fakturasi**
+sifatida yoziladi, shuning uchun umumiy summa avtomatik hisoblanadi va
+Fakturalar/Hisobotlar bo'limlarida ko'rinadi.
 
 ## Ma'lum cheklovlar / keyingi qadamlar
 

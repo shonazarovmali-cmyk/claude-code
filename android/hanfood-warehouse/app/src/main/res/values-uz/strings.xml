@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">%1$d ta mahsulot kam qolgan — Hisobotlar bo\'limidan ko\'ring</string>
     <string name="dashboard_quick_actions">Tezkor amallar</string>
     <string name="dashboard_recent_transactions">So\'nggi harakatlar</string>
+    <string name="dashboard_top_products_title">Eng aktiv tovarlar</string>
+    <string name="dashboard_top_products_sold">%1$s %2$s sotildi</string>
     <string name="dashboard_no_transactions_yet">Hali hech qanday harakat qayd etilmagan</string>
     <string name="quick_action_stock_in">Kirim qilish</string>
     <string name="quick_action_stock_out">Yuk berish</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Joylashuvga ruxsat berilmadi</string>
     <string name="error_location_unavailable">Joylashuvni aniqlab bo\'lmadi</string>
     <string name="client_location_saved">Joylashuv saqlangan</string>
+    <string name="location_picker_title">Xaritada joyni belgilash</string>
+    <string name="location_picker_hint">Pin kerakli nuqtaga tushishi uchun xaritani harakatlantiring, so\'ng tasdiqlang</string>
+    <string name="action_confirm_location">Shu joyni tasdiqlash</string>
+    <string name="action_pick_on_map">Xaritadan belgilash</string>
+    <string name="action_adjust_on_map">O\'zgartirish</string>
+    <string name="action_find_on_map">Xaritadan topish</string>
+    <string name="client_address_geocode_hint">Shu manzilni xaritadan topish uchun qidiruv belgisini bosing</string>
+    <string name="error_geocode_not_found">Bu manzil xaritadan topilmadi</string>
     <string name="error_client_name_required">Mijoz nomini kiriting</string>
     <string name="error_client_not_found">Mijoz topilmadi</string>
     <string name="cd_close">Yopish</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Hisobotlar</string>
     <string name="biometric_prompt_subtitle">Kirish uchun barmoq izingizni tekshiring</string>
     <string name="action_cancel">Bekor qilish</string>
+    <string name="action_ok">OK</string>
+    <string name="action_import_excel">Excel\'dan import qilish</string>
+    <string name="excel_import_in_progress">Import qilinmoqda</string>
+    <string name="excel_import_in_progress_body">Jadval o\'qilyapti va omborga qo\'shilyapti…</string>
+    <string name="excel_import_failed_title">Import muvaffaqiyatsiz</string>
+    <string name="excel_import_failed_body">Bu faylni o\'qib bo\'lmadi. Fayl to\'g\'ri .xlsx jadval ekaniga va ustunlari shu tartibda ekaniga ishonch hosil qiling: nomi, shtrix-kod, o\'lchov birligi, miqdor, minimal qoldiq, tannarx, sotish narxi (birinchi qator sarlavha).</string>
+    <string name="excel_import_done_title">Import yakunlandi</string>
+    <string name="excel_import_done_body">Yangi mahsulotlar: %1$d
+Mavjud mahsulotlar yangilandi: %2$d
+Qo\'shilgan qatorlar: %3$d
+
+Hammasi bitta kirim fakturasi sifatida yozildi.</string>
+    <string name="action_delete">O\'chirish</string>
+    <string name="action_delete_product">Mahsulotni o\'chirish</string>
+    <string name="action_delete_client">Mijozni o\'chirish</string>
+    <string name="action_delete_invoice">Fakturani o\'chirish</string>
+    <string name="confirm_delete_product_title">Bu mahsulot o\'chirilsinmi?</string>
+    <string name="confirm_delete_product_message">Mahsulotlar ro\'yxatidan yashiriladi. Eski fakturalar/hisobotlardagi tarixi saqlanib qoladi.</string>
+    <string name="confirm_delete_client_title">Bu mijoz o\'chirilsinmi?</string>
+    <string name="confirm_delete_client_message">Mijozlar ro\'yxatidan yashiriladi. Eski fakturalar/hisobotlardagi tarixi saqlanib qoladi.</string>
+    <string name="confirm_delete_invoice_title">Bu faktura o\'chirilsinmi?</string>
+    <string name="confirm_delete_invoice_message">Bu amalni ortga qaytarib bo\'lmaydi. Fakturaning mahsulot qoldig\'iga qilgan ta\'siri bekor qilinadi.</string>
     <string name="settings_title">Sozlamalar</string>
     <string name="settings_section_security">Xavfsizlik</string>
     <string name="settings_change_pin">PIN-kodni o\'zgartirish</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Tilni tanlang</string>
     <string name="action_close">Yopish</string>
     <string name="product_photo_add">Rasm qo\'shish</string>
-    <string name="product_photo_change">Rasmni almashtirish</string>
+    <string name="product_photo_count">Rasmlar: %2$d tadan %1$d tasi</string>
     <string name="product_photo_remove">O\'chirish</string>
     <string name="cd_product_photo">Mahsulot rasmi</string>
     <string name="invoice_title_field">Faktura nomi (ixtiyoriy)</string>

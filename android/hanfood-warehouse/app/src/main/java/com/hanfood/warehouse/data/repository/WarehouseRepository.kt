@@ -11,6 +11,7 @@ import com.hanfood.warehouse.data.local.entity.TransactionItem
 import com.hanfood.warehouse.data.local.entity.TransactionItemDetail
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.local.entity.toAttachmentPathsString
+import com.hanfood.warehouse.util.ExcelProductRow
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -23,6 +24,14 @@ data class CartLine(
     val unit: String,
     val quantity: Double,
     val unitPrice: Double
+)
+
+/** Excel'dan import natijasi — Sozlamalar/Mahsulotlar ekranida xulosa ko'rsatish uchun. */
+data class ExcelImportResult(
+    val productsCreated: Int,
+    val productsMatched: Int,
+    val stockLines: Int,
+    val transactionId: Long?
 )
 
 /** [WarehouseRepository.recordStockOut] uchun mahsulot yetarli emasligi haqidagi xatolik. */
@@ -61,6 +70,60 @@ class WarehouseRepository(private val db: AppDatabase) {
 
     suspend fun archiveProduct(product: Product) {
         db.productDao().update(product.copy(isArchived = true))
+    }
+
+    /**
+     * Excel jadvaldan mahsulotlarni ombor bilan bir vaqtda import qiladi:
+     * har bir qator uchun shtrix-kod (yoki topilmasa nomi) bo'yicha mavjud
+     * mahsulot izlanadi — topilsa unga, topilmasa yangi yaratilgan
+     * mahsulotga miqdor qo'shiladi. Barcha qatorlar bitta "kirim" (STOCK_IN)
+     * fakturasi sifatida yoziladi — shu bilan umumiy summa avtomatik
+     * hisoblanadi va qoldiq/hisobotlarda ko'rinadi.
+     */
+    suspend fun importProductsFromExcel(rows: List<ExcelProductRow>, sourceLabel: String?): ExcelImportResult {
+        if (rows.isEmpty()) return ExcelImportResult(0, 0, 0, null)
+        var created = 0
+        var matched = 0
+        val lines = mutableListOf<CartLine>()
+        for (row in rows) {
+            val existing = row.barcode?.let { db.productDao().getByBarcode(it) }
+                ?: db.productDao().getByNameIgnoreCase(row.name)
+            val productId: Long
+            if (existing != null) {
+                productId = existing.id
+                matched++
+            } else {
+                productId = db.productDao().insert(
+                    Product(
+                        name = row.name,
+                        barcode = row.barcode,
+                        unit = row.unit,
+                        quantity = 0.0,
+                        minQuantity = row.minQuantity,
+                        purchasePrice = row.purchasePrice,
+                        sellPrice = row.sellPrice
+                    )
+                )
+                created++
+            }
+            if (row.quantity > 0) {
+                lines.add(
+                    CartLine(
+                        productId = productId,
+                        productName = row.name,
+                        unit = row.unit,
+                        quantity = row.quantity,
+                        unitPrice = row.purchasePrice
+                    )
+                )
+            }
+        }
+        val transactionId = if (lines.isNotEmpty()) {
+            recordStockIn(supplierName = null, note = null, lines = lines, title = sourceLabel)
+        } else {
+            null
+        }
+        return ExcelImportResult(created, matched, lines.size, transactionId)
     }
 
     // ---- Mijozlar ----
@@ -206,6 +269,24 @@ class WarehouseRepository(private val db: AppDatabase) {
         transactionId
     }
 
+    /**
+     * Fakturani (kirim/chiqim/qaytarish) butunlay o'chiradi va mahsulot
+     * qoldig'iga qilgan ta'sirini bekor qiladi: STOCK_IN/RETURN uchun
+     * qo'shilgan miqdor ayiriladi, STOCK_OUT uchun ayirilgan miqdor qayta
+     * qo'shiladi. Faktura qatorlari (transaction_items) FK CASCADE orqali
+     * avtomatik o'chadi.
+     */
+    suspend fun deleteTransaction(transactionId: Long) = db.withTransaction {
+        val dao = db.transactionDao()
+        val transaction = dao.getById(transactionId) ?: return@withTransaction
+        val items = dao.getItemsForTransactionOnce(transactionId)
+        val sign = if (transaction.type == TransactionType.STOCK_OUT) 1.0 else -1.0
+        for (item in items) {
+            db.productDao().adjustQuantity(item.productId, sign * item.quantity)
+        }
+        dao.deleteTransaction(transaction)
+    }
+
     private suspend fun generateInvoiceNumber(type: TransactionType): String {
         val prefix = when (type) {
             TransactionType.STOCK_IN -> "KIR"
@@ -215,6 +296,16 @@ class WarehouseRepository(private val db: AppDatabase) {
         val countSoFar = db.transactionDao().countByType(type)
         val datePart = invoiceDateFormat.format(Date())
         return "$prefix-$datePart-${(countSoFar + 1).toString().padStart(4, '0')}"
+    }
+
+    /**
+     * Oxirgi 30 kunda eng ko'p sotilgan (chiqim qilingan) mahsulotlar —
+     * bosh sahifadagi "eng aktiv tovarlar" bannerida ko'rsatish uchun.
+     */
+    suspend fun topSellingProducts(limit: Int = 8): List<ProductMovementSummary> {
+        val to = System.currentTimeMillis()
+        val from = to - 30L * 24 * 60 * 60 * 1000
+        return db.transactionDao().topProductsByType(TransactionType.STOCK_OUT, from, to, limit)
     }
 
     // ---- Hisobotlar ----

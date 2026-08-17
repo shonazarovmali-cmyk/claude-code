@@ -17,6 +17,8 @@
     <string name="dashboard_low_stock_banner">Закінчується %1$d товар(ів) — перегляньте розділ «Звіти»</string>
     <string name="dashboard_quick_actions">Швидкі дії</string>
     <string name="dashboard_recent_transactions">Останні операції</string>
+    <string name="dashboard_top_products_title">Найактивніші товари</string>
+    <string name="dashboard_top_products_sold">продано %1$s %2$s</string>
     <string name="dashboard_no_transactions_yet">Операцій поки що не було</string>
     <string name="quick_action_stock_in">Надходження</string>
     <string name="quick_action_stock_out">Видати товар</string>
@@ -67,6 +69,14 @@
     <string name="error_location_permission_denied">Доступ до місцезнаходження не надано</string>
     <string name="error_location_unavailable">Не вдалося визначити місцезнаходження</string>
     <string name="client_location_saved">Місцезнаходження збережено</string>
+    <string name="location_picker_title">Позначити на карті</string>
+    <string name="location_picker_hint">Пересуньте карту так, щоб мітка стала на потрібне місце, потім підтвердьте</string>
+    <string name="action_confirm_location">Підтвердити це місце</string>
+    <string name="action_pick_on_map">Позначити на карті</string>
+    <string name="action_adjust_on_map">Змінити</string>
+    <string name="action_find_on_map">Знайти на карті</string>
+    <string name="client_address_geocode_hint">Натисніть значок пошуку, щоб знайти цю адресу на карті</string>
+    <string name="error_geocode_not_found">Не вдалося знайти цю адресу на карті</string>
     <string name="error_client_name_required">Введіть ім\'я клієнта</string>
     <string name="error_client_not_found">Клієнта не знайдено</string>
     <string name="cd_close">Закрити</string>
@@ -143,6 +153,28 @@
     <string name="tab_reports">Звіти</string>
     <string name="biometric_prompt_subtitle">Підтвердіть відбиток пальця, щоб продовжити</string>
     <string name="action_cancel">Скасувати</string>
+    <string name="action_ok">OK</string>
+    <string name="action_import_excel">Імпорт з Excel</string>
+    <string name="excel_import_in_progress">Імпортування</string>
+    <string name="excel_import_in_progress_body">Читаємо таблицю і додаємо на склад…</string>
+    <string name="excel_import_failed_title">Не вдалося імпортувати</string>
+    <string name="excel_import_failed_body">Не вдалося прочитати цей файл. Переконайтеся, що це коректна таблиця .xlsx зі стовпцями: назва, штрих-код, одиниця виміру, кількість, мінімальний залишок, закупівельна ціна, ціна продажу (перший рядок — заголовок).</string>
+    <string name="excel_import_done_title">Імпорт завершено</string>
+    <string name="excel_import_done_body">Нові товари: %1$d
+Оновлено наявних: %2$d
+Додано рядків: %3$d
+
+Усе записано як одна накладна надходження.</string>
+    <string name="action_delete">Видалити</string>
+    <string name="action_delete_product">Видалити товар</string>
+    <string name="action_delete_client">Видалити клієнта</string>
+    <string name="action_delete_invoice">Видалити накладну</string>
+    <string name="confirm_delete_product_title">Видалити цей товар?</string>
+    <string name="confirm_delete_product_message">Він буде прихований зі списку товарів. Історія в минулих накладних і звітах збережеться.</string>
+    <string name="confirm_delete_client_title">Видалити цього клієнта?</string>
+    <string name="confirm_delete_client_message">Він буде прихований зі списку клієнтів. Історія в минулих накладних і звітах збережеться.</string>
+    <string name="confirm_delete_invoice_title">Видалити цю накладну?</string>
+    <string name="confirm_delete_invoice_message">Цю дію не можна скасувати. Вплив накладної на залишок товару буде скасовано.</string>
     <string name="settings_title">Налаштування</string>
     <string name="settings_section_security">Безпека</string>
     <string name="settings_change_pin">Змінити PIN-код</string>
@@ -161,7 +193,7 @@
     <string name="settings_language_dialog_title">Оберіть мову</string>
     <string name="action_close">Закрити</string>
     <string name="product_photo_add">Додати фото</string>
-    <string name="product_photo_change">Змінити фото</string>
+    <string name="product_photo_count">Фото: %1$d з %2$d</string>
     <string name="product_photo_remove">Видалити</string>
     <string name="cd_product_photo">Фото товару</string>
     <string name="invoice_title_field">Назва накладної (необов\'язково)</string>

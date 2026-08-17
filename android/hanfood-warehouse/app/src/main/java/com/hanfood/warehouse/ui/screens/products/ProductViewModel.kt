@@ -1,17 +1,33 @@
 package com.hanfood.warehouse.ui.screens.products
 
+import android.content.Context
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Product
+import com.hanfood.warehouse.data.local.entity.toAttachmentList
+import com.hanfood.warehouse.data.local.entity.toAttachmentPathsString
+import com.hanfood.warehouse.data.repository.ExcelImportResult
 import com.hanfood.warehouse.data.repository.WarehouseRepository
+import com.hanfood.warehouse.util.ExcelImporter
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
+/** Products screen's "import from Excel" flow state. */
+sealed interface ExcelImportUiState {
+    data object Idle : ExcelImportUiState
+    data object Importing : ExcelImportUiState
+    data object Error : ExcelImportUiState
+    data class Success(val result: ExcelImportResult) : ExcelImportUiState
+}
 
 class ProductListViewModel(private val repository: WarehouseRepository) : ViewModel() {
 
@@ -21,12 +37,32 @@ class ProductListViewModel(private val repository: WarehouseRepository) : ViewMo
         .flatMapLatest { q -> if (q.isBlank()) repository.products else repository.searchProducts(q) }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 
+    private val _importState = MutableStateFlow<ExcelImportUiState>(ExcelImportUiState.Idle)
+    val importState: StateFlow<ExcelImportUiState> = _importState
+
     fun onQueryChange(value: String) {
         query.value = value
     }
 
     fun archive(product: Product) {
         viewModelScope.launch { repository.archiveProduct(product) }
+    }
+
+    fun importExcel(context: Context, uri: Uri) {
+        _importState.value = ExcelImportUiState.Importing
+        viewModelScope.launch {
+            val rows = withContext(Dispatchers.IO) { ExcelImporter.parse(context, uri) }
+            if (rows.isNullOrEmpty()) {
+                _importState.value = ExcelImportUiState.Error
+                return@launch
+            }
+            val result = repository.importProductsFromExcel(rows, sourceLabel = null)
+            _importState.value = ExcelImportUiState.Success(result)
+        }
+    }
+
+    fun dismissImportState() {
+        _importState.value = ExcelImportUiState.Idle
     }
 }
 
@@ -40,9 +76,10 @@ data class ProductEditUiState(
     val purchasePrice: String = "0",
     val sellPrice: String = "0",
     val category: String = "",
-    val imagePath: String? = null,
+    val imagePaths: List<String> = emptyList(),
     val loaded: Boolean = false,
     val saved: Boolean = false,
+    val deleted: Boolean = false,
     @StringRes val errorRes: Int? = null
 )
 
@@ -69,7 +106,7 @@ class ProductEditViewModel(
                         purchasePrice = product.purchasePrice.toPlainStringTrimmed(),
                         sellPrice = product.sellPrice.toPlainStringTrimmed(),
                         category = product.category.orEmpty(),
-                        imagePath = product.imagePath,
+                        imagePaths = product.imagePaths.toAttachmentList(),
                         loaded = true
                     )
                 } else {
@@ -87,12 +124,24 @@ class ProductEditViewModel(
         _state.value = _state.value.copy(barcode = code)
     }
 
-    fun applyPickedImage(path: String) {
-        _state.value = _state.value.copy(imagePath = path)
+    fun addImages(paths: List<String>) {
+        val current = _state.value.imagePaths
+        val remaining = (MAX_IMAGES - current.size).coerceAtLeast(0)
+        if (remaining == 0 || paths.isEmpty()) return
+        _state.value = _state.value.copy(imagePaths = current + paths.take(remaining))
     }
 
-    fun clearImage() {
-        _state.value = _state.value.copy(imagePath = null)
+    fun removeImage(path: String) {
+        _state.value = _state.value.copy(imagePaths = _state.value.imagePaths.filterNot { it == path })
+    }
+
+    fun delete() {
+        if (productId == 0L) return
+        viewModelScope.launch {
+            val product = repository.getProduct(productId) ?: return@launch
+            repository.archiveProduct(product)
+            _state.value = _state.value.copy(deleted = true)
+        }
     }
 
     fun save() {
@@ -112,7 +161,7 @@ class ProductEditViewModel(
                 purchasePrice = s.purchasePrice.toDoubleOrNull() ?: 0.0,
                 sellPrice = s.sellPrice.toDoubleOrNull() ?: 0.0,
                 category = s.category.trim().ifBlank { null },
-                imagePath = s.imagePath
+                imagePaths = s.imagePaths.toAttachmentPathsString()
             )
             try {
                 repository.upsertProduct(product)
@@ -121,6 +170,10 @@ class ProductEditViewModel(
                 _state.value = _state.value.copy(errorRes = R.string.error_product_save_duplicate)
             }
         }
+    }
+
+    companion object {
+        const val MAX_IMAGES = 10
     }
 }
 

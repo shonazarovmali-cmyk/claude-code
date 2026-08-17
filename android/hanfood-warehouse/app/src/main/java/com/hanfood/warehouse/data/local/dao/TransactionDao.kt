@@ -1,6 +1,7 @@
 package com.hanfood.warehouse.data.local.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -20,6 +21,18 @@ interface TransactionDao {
 
     @Insert(onConflict = OnConflictStrategy.ABORT)
     suspend fun insertItems(items: List<TransactionItem>): List<Long>
+
+    /**
+     * Faktura (StockTransaction) o'chirilishi kerak bo'lganda mahsulot
+     * qoldig'iga qanday ta'sir qilganini bekor qilish uchun qatorlarini
+     * bir martalik ro'yxat sifatida o'qiydi (Flow emas).
+     */
+    @Query("SELECT * FROM transaction_items WHERE transaction_id = :transactionId")
+    suspend fun getItemsForTransactionOnce(transactionId: Long): List<TransactionItem>
+
+    /** Faktura o'chirilganda tegishli qatorlar (transaction_items) FK CASCADE orqali avtomatik o'chadi. */
+    @Delete
+    suspend fun deleteTransaction(transaction: StockTransaction)
 
     @Query("SELECT * FROM stock_transactions ORDER BY date DESC")
     fun observeAll(): Flow<List<StockTransaction>>
@@ -79,7 +92,8 @@ interface TransactionDao {
 
     @Query(
         """
-        SELECT p.id AS productId, p.name AS productName, p.unit AS unit, SUM(ti.quantity) AS totalQuantity
+        SELECT p.id AS productId, p.name AS productName, p.unit AS unit, SUM(ti.quantity) AS totalQuantity,
+               p.image_paths AS imagePaths
         FROM transaction_items ti
         INNER JOIN stock_transactions t ON t.id = ti.transaction_id
         INNER JOIN products p ON p.id = ti.product_id

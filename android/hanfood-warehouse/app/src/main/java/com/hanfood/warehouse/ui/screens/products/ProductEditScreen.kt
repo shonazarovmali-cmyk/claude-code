@@ -1,6 +1,7 @@
 package com.hanfood.warehouse.ui.screens.products
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -12,7 +13,10 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -24,7 +28,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,8 +35,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +52,8 @@ import coil.compose.AsyncImage
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
+import com.hanfood.warehouse.ui.components.ConfirmDeleteDialog
+import com.hanfood.warehouse.ui.components.DeleteAction
 import com.hanfood.warehouse.ui.navigation.ScannerBus
 import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
@@ -70,12 +77,17 @@ fun ProductEditScreen(
     val scanned by ScannerBus.lastScanned.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    var showDeleteConfirm by remember { mutableStateOf(false) }
 
-    val imagePicker = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-        if (uri != null) {
+    val imagePicker = rememberLauncherForActivityResult(
+        ActivityResultContracts.PickMultipleVisualMedia(maxItems = ProductEditViewModel.MAX_IMAGES)
+    ) { uris ->
+        if (uris.isNotEmpty()) {
             scope.launch {
-                val path = withContext(Dispatchers.IO) { FileStorage.saveProductImage(context, uri) }
-                if (path != null) viewModel.applyPickedImage(path)
+                val paths = withContext(Dispatchers.IO) {
+                    uris.mapNotNull { uri -> FileStorage.saveProductImage(context, uri) }
+                }
+                if (paths.isNotEmpty()) viewModel.addImages(paths)
             }
         }
     }
@@ -89,12 +101,35 @@ fun ProductEditScreen(
     LaunchedEffect(state.saved) {
         if (state.saved) onBack()
     }
+    LaunchedEffect(state.deleted) {
+        if (state.deleted) onBack()
+    }
+
+    if (showDeleteConfirm) {
+        ConfirmDeleteDialog(
+            title = stringResource(R.string.confirm_delete_product_title),
+            message = stringResource(R.string.confirm_delete_product_message),
+            onConfirm = {
+                showDeleteConfirm = false
+                viewModel.delete()
+            },
+            onDismiss = { showDeleteConfirm = false }
+        )
+    }
 
     Scaffold(
         topBar = {
             BackTopBar(
                 title = stringResource(if (productId == 0L) R.string.product_edit_title_new else R.string.product_edit_title_edit),
-                onBack = onBack
+                onBack = onBack,
+                actions = {
+                    if (productId != 0L) {
+                        DeleteAction(
+                            contentDescription = stringResource(R.string.action_delete_product),
+                            onClick = { showDeleteConfirm = true }
+                        )
+                    }
+                }
             )
         }
     ) { padding ->
@@ -107,9 +142,9 @@ fun ProductEditScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             ProductPhotoPicker(
-                imagePath = state.imagePath,
-                onPick = { imagePicker.launch("image/*") },
-                onRemove = { viewModel.clearImage() }
+                imagePaths = state.imagePaths,
+                onPick = { imagePicker.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)) },
+                onRemove = { path -> viewModel.removeImage(path) }
             )
 
             OutlinedTextField(
@@ -199,61 +234,120 @@ fun ProductEditScreen(
     }
 }
 
+/**
+ * Up to [ProductEditViewModel.MAX_IMAGES] photos per product, swiped through
+ * like an Instagram multi-photo post — a [HorizontalPager] with dot
+ * indicators, plus a trailing "add more" page once under the cap.
+ */
 @Composable
 private fun ProductPhotoPicker(
-    imagePath: String?,
+    imagePaths: List<String>,
     onPick: () -> Unit,
-    onRemove: () -> Unit
+    onRemove: (String) -> Unit
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(160.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(MaterialTheme.colorScheme.surfaceVariant)
-    ) {
-        if (imagePath != null) {
-            AsyncImage(
-                model = File(imagePath),
-                contentDescription = stringResource(R.string.cd_product_photo),
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxWidth().fillMaxSize()
-            )
-            IconButton(
-                onClick = onRemove,
+    val canAddMore = imagePaths.size < ProductEditViewModel.MAX_IMAGES
+    // Pages: one per existing photo, plus a trailing "add" page if there's room.
+    val pageCount = imagePaths.size + if (canAddMore) 1 else 0
+
+    if (pageCount == 0) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(160.dp)
+                .clip(RoundedCornerShape(16.dp))
+                .background(MaterialTheme.colorScheme.surfaceVariant)
+        ) {
+            AddPhotoTile(onPick = onPick)
+        }
+        return
+    }
+
+    val pagerState = rememberPagerState(pageCount = { pageCount })
+
+    Column {
+        HorizontalPager(
+            state = pagerState,
+            modifier = Modifier.fillMaxWidth().height(160.dp)
+        ) { page ->
+            Box(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), RoundedCornerShape(50))
+                    .fillMaxWidth()
+                    .fillMaxSize()
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(MaterialTheme.colorScheme.surfaceVariant)
             ) {
-                Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.product_photo_remove))
-            }
-            OutlinedButton(
-                onClick = onPick,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(10.dp)
-            ) {
-                Text(stringResource(R.string.product_photo_change))
-            }
-        } else {
-            Column(
-                modifier = Modifier.fillMaxSize(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
-            ) {
-                IconButton(onClick = onPick, modifier = Modifier.size(48.dp)) {
-                    Icon(
-                        Icons.Filled.AddAPhoto,
+                if (page < imagePaths.size) {
+                    val path = imagePaths[page]
+                    AsyncImage(
+                        model = File(path),
                         contentDescription = stringResource(R.string.cd_product_photo),
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(32.dp)
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
                     )
+                    IconButton(
+                        onClick = { onRemove(path) },
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(6.dp)
+                            .background(MaterialTheme.colorScheme.surface.copy(alpha = 0.85f), RoundedCornerShape(50))
+                    ) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.product_photo_remove))
+                    }
+                } else {
+                    AddPhotoTile(onPick = onPick)
                 }
-                Text(
-                    stringResource(R.string.product_photo_add),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
             }
         }
+
+        if (pageCount > 1) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                repeat(pageCount) { index ->
+                    val selected = pagerState.currentPage == index
+                    Box(
+                        modifier = Modifier
+                            .padding(horizontal = 3.dp)
+                            .size(if (selected) 8.dp else 6.dp)
+                            .clip(CircleShape)
+                            .background(
+                                if (selected) MaterialTheme.colorScheme.primary
+                                else MaterialTheme.colorScheme.outlineVariant
+                            )
+                    )
+                }
+            }
+        }
+
+        Text(
+            stringResource(R.string.product_photo_count, imagePaths.size, ProductEditViewModel.MAX_IMAGES),
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun AddPhotoTile(onPick: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxSize(),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        IconButton(onClick = onPick, modifier = Modifier.size(48.dp)) {
+            Icon(
+                Icons.Filled.AddAPhoto,
+                contentDescription = stringResource(R.string.cd_product_photo),
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(32.dp)
+            )
+        }
+        Text(
+            stringResource(R.string.product_photo_add),
+            style = MaterialTheme.typography.labelMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
     }
 }

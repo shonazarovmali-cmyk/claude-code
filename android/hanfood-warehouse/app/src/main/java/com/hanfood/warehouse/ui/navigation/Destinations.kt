@@ -30,6 +30,7 @@ object Routes {
     fun movement(type: String) = "movement/$type"
 
     const val SCANNER = "scanner"
+    const val LOCATION_PICKER = "location_picker"
 
     /** Bottom navigatsiya panelidagi asosiy 5 ta bo'lim. */
     val bottomTabs = listOf(DASHBOARD, PRODUCTS, CLIENTS, INVOICES, REPORTS)

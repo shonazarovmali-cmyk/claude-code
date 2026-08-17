@@ -21,7 +21,7 @@ import com.hanfood.warehouse.data.local.entity.TransactionItem
  */
 @Database(
     entities = [Product::class, Client::class, StockTransaction::class, TransactionItem::class],
-    version = 3,
+    version = 4,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -60,6 +60,19 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v3 -> v4: mahsulotda bitta rasm o'rniga o'ntagacha rasm (products.image_paths,
+         * vergul bilan ajratilgan ro'yxat). Eski `image_path` ustunidagi mavjud rasm
+         * yangi ustunga ko'chiriladi (yo'qolmaydi); eski ustun o'zi ishlatilmay qoladi
+         * (Room jadvaldagi ortiqcha ustunlarni e'tiborsiz qoldiradi, xato bermaydi).
+         */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE products ADD COLUMN image_paths TEXT")
+                db.execSQL("UPDATE products SET image_paths = image_path WHERE image_path IS NOT NULL")
+            }
+        }
+
         @Volatile
         private var instance: AppDatabase? = null
 
@@ -70,7 +83,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DB_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                     .build().also { instance = it }
             }
     }

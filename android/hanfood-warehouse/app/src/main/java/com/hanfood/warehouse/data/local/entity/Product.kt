@@ -32,9 +32,14 @@ data class Product(
     @ColumnInfo(name = "sell_price", defaultValue = "0")
     val sellPrice: Double = 0.0,
     val category: String? = null,
-    /** Mahsulot rasmi — ilova ichki xotirasidagi fayl yo'li (content:// emas). */
-    @ColumnInfo(name = "image_path")
-    val imagePath: String? = null,
+    /**
+     * Mahsulot rasmlari — ilova ichki xotirasidagi fayl yo'llari
+     * (content:// emas), vergul bilan ajratilgan, birinchisi asosiy/muqova
+     * rasm sifatida ishlatiladi. Bittadan o'ntagacha. [toAttachmentList] /
+     * [toAttachmentPathsString] orqali List<String>'ga aylantiriladi.
+     */
+    @ColumnInfo(name = "image_paths")
+    val imagePaths: String? = null,
     @ColumnInfo(name = "is_archived", defaultValue = "0")
     val isArchived: Boolean = false,
     @ColumnInfo(name = "created_at")

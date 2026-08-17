@@ -42,6 +42,10 @@ interface ProductDao {
     @Query("SELECT * FROM products WHERE barcode = :barcode AND is_archived = 0 LIMIT 1")
     suspend fun getByBarcode(barcode: String): Product?
 
+    /** Excel import uchun — shtrix-kodsiz qatorlarda mahsulotni nomi bo'yicha (katta-kichik harfga sezgir emas) topish. */
+    @Query("SELECT * FROM products WHERE is_archived = 0 AND name = :name COLLATE NOCASE LIMIT 1")
+    suspend fun getByNameIgnoreCase(name: String): Product?
+
     @Query(
         """
         SELECT * FROM products
