@@ -41,8 +41,8 @@
     <string name="product_field_unit">Birim (adet, kg, kutu ...)</string>
     <string name="product_field_quantity">Mevcut stok</string>
     <string name="product_field_min_quantity">Minimum stok</string>
-    <string name="product_field_purchase_price">Alış fiyatı (UZS)</string>
-    <string name="product_field_sell_price">Satış fiyatı (UZS)</string>
+    <string name="product_field_purchase_price">Alış fiyatı (zł)</string>
+    <string name="product_field_sell_price">Satış fiyatı (zł)</string>
     <string name="product_field_category">Kategori (isteğe bağlı)</string>
     <string name="action_save">Kaydet</string>
     <string name="error_product_name_required">Bir ürün adı girin</string>

@@ -41,8 +41,8 @@
     <string name="product_field_unit">Einheit (Stück, kg, Karton ...)</string>
     <string name="product_field_quantity">Aktueller Bestand</string>
     <string name="product_field_min_quantity">Mindestbestand</string>
-    <string name="product_field_purchase_price">Einkaufspreis (UZS)</string>
-    <string name="product_field_sell_price">Verkaufspreis (UZS)</string>
+    <string name="product_field_purchase_price">Einkaufspreis (zł)</string>
+    <string name="product_field_sell_price">Verkaufspreis (zł)</string>
     <string name="product_field_category">Kategorie (optional)</string>
     <string name="action_save">Speichern</string>
     <string name="error_product_name_required">Geben Sie einen Produktnamen ein</string>

@@ -41,8 +41,8 @@
     <string name="product_field_unit">Одиниця виміру (шт, кг, коробка ...)</string>
     <string name="product_field_quantity">Поточний залишок</string>
     <string name="product_field_min_quantity">Мінімальний залишок</string>
-    <string name="product_field_purchase_price">Закупівельна ціна (сум)</string>
-    <string name="product_field_sell_price">Ціна продажу (сум)</string>
+    <string name="product_field_purchase_price">Закупівельна ціна (zł)</string>
+    <string name="product_field_sell_price">Ціна продажу (zł)</string>
     <string name="product_field_category">Категорія (необов\'язково)</string>
     <string name="action_save">Зберегти</string>
     <string name="error_product_name_required">Введіть назву товару</string>

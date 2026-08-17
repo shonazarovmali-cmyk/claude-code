@@ -41,8 +41,8 @@
     <string name="product_field_unit">Единица измерения (шт, кг, коробка ...)</string>
     <string name="product_field_quantity">Текущий остаток</string>
     <string name="product_field_min_quantity">Минимальный остаток</string>
-    <string name="product_field_purchase_price">Закупочная цена (сум)</string>
-    <string name="product_field_sell_price">Цена продажи (сум)</string>
+    <string name="product_field_purchase_price">Закупочная цена (zł)</string>
+    <string name="product_field_sell_price">Цена продажи (zł)</string>
     <string name="product_field_category">Категория (необязательно)</string>
     <string name="action_save">Сохранить</string>
     <string name="error_product_name_required">Введите название товара</string>

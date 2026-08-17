@@ -41,8 +41,8 @@
     <string name="product_field_unit">Unit (piece, kg, box ...)</string>
     <string name="product_field_quantity">Current stock</string>
     <string name="product_field_min_quantity">Minimum stock</string>
-    <string name="product_field_purchase_price">Purchase price (UZS)</string>
-    <string name="product_field_sell_price">Selling price (UZS)</string>
+    <string name="product_field_purchase_price">Purchase price (zł)</string>
+    <string name="product_field_sell_price">Selling price (zł)</string>
     <string name="product_field_category">Category (optional)</string>
     <string name="action_save">Save</string>
     <string name="error_product_name_required">Enter a product name</string>

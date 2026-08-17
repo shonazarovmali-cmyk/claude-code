@@ -41,8 +41,8 @@
     <string name="product_field_unit">O\'lchov birligi (dona, kg, quti ...)</string>
     <string name="product_field_quantity">Joriy qoldiq</string>
     <string name="product_field_min_quantity">Minimal qoldiq</string>
-    <string name="product_field_purchase_price">Tannarx (so\'m)</string>
-    <string name="product_field_sell_price">Sotish narxi (so\'m)</string>
+    <string name="product_field_purchase_price">Tannarx (zł)</string>
+    <string name="product_field_sell_price">Sotish narxi (zł)</string>
     <string name="product_field_category">Toifa (ixtiyoriy)</string>
     <string name="action_save">Saqlash</string>
     <string name="error_product_name_required">Mahsulot nomini kiriting</string>

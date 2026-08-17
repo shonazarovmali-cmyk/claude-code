@@ -41,8 +41,8 @@
     <string name="product_field_unit">Jednostka (szt., kg, karton ...)</string>
     <string name="product_field_quantity">Bieżący stan</string>
     <string name="product_field_min_quantity">Minimalny stan</string>
-    <string name="product_field_purchase_price">Cena zakupu (UZS)</string>
-    <string name="product_field_sell_price">Cena sprzedaży (UZS)</string>
+    <string name="product_field_purchase_price">Cena zakupu (zł)</string>
+    <string name="product_field_sell_price">Cena sprzedaży (zł)</string>
     <string name="product_field_category">Kategoria (opcjonalnie)</string>
     <string name="action_save">Zapisz</string>
     <string name="error_product_name_required">Podaj nazwę produktu</string>
