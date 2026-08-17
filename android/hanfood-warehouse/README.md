@@ -206,8 +206,21 @@ Fakturalar/Hisobotlar bo'limlarida ko'rinadi.
 - Ilova bitta qurilmada oflayn ishlaydi — bir nechta xodim/qurilma
   o'rtasida real-vaqtli sinxronizatsiya yo'q (kerak bo'lsa, Firebase yoki
   boshqa bulutli backend qo'shish mumkin).
-- Release build hozircha imzolanmagan (debug signing bilan qurilgan) —
-  Google Play'ga chiqarish uchun o'z release kalitingizni sozlang.
+- Release build hozircha o'z release kaliti bilan emas, repo ichidagi
+  doimiy `app/debug.keystore` bilan imzolanadi (Google Play'ga chiqarish
+  uchun o'z release kalitingizni sozlang). **Ataylab qurilma-mustaqil**:
+  standart Android debug kaliti odatda har bir qurilgan mashinaning o'z
+  `~/.android/debug.keystore`'iga bog'liq bo'lib, alohida sessiyalarda
+  qurilgan APK'lar boshqa-boshqa imzo bilan chiqib ketishi mumkin edi —
+  natijada foydalanuvchi eski versiyani telefonidan avval **qo'lda
+  o'chirmasdan** yangisini o'rnata olmasdi ("App not installed" xatosi).
+  Endi barcha build'lar committed keystore orqali bir xil imzo bilan
+  chiqadi, shu bilan yangilanishlar to'g'ridan-to'g'ri ustidan o'rnatiladi.
+
+  > ⚠️ Agar telefoningizda shu ilovaning **v1.5.0 yoki undan eski** versiyasi
+  > o'rnatilgan bo'lsa, u hali eski (mashinaga bog'liq) kalit bilan
+  > imzolangan — shuning uchun **bir martalik** o'chirib-qayta o'rnatish
+  > kerak bo'ladi. v1.5.1'dan boshlab bu muammo umuman qaytmaydi.
 - Ilova ikonkasi vektor asosida yaratilgan (minSdk 26, adaptive icon) —
   xohlasangiz haqiqiy brend logotipi bilan almashtiring
   (`app/src/main/res/drawable/ic_launcher_*.xml`).

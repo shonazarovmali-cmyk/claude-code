@@ -14,8 +14,8 @@ android {
         applicationId = "com.hanfood.warehouse"
         minSdk = 26
         targetSdk = 34
-        versionCode = 7
-        versionName = "1.5.0"
+        versionCode = 8
+        versionName = "1.5.1"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -23,6 +23,26 @@ android {
         // x86/x86_64 kutubxonalarini chiqarib tashlab APK hajmini qisqartiramiz.
         ndk {
             abiFilters += listOf("armeabi-v7a", "arm64-v8a")
+        }
+    }
+
+    signingConfigs {
+        getByName("debug") {
+            // Standart Android "debug" konfiguratsiyasi har bir mashinaning o'z
+            // ~/.android/debug.keystore fayliga tayanadi — bu build muhiti
+            // (sandbox) har safar yangilanganda avtomatik boshqa kalit bilan
+            // almashtirilib ketadi. Natijada oldingi o'rnatilgan APK'ning imzosi
+            // yangisiga mos kelmay qolib, Android "App not installed" xatosini
+            // beradi (foydalanuvchi eski versiyani avval o'chirishga majbur
+            // bo'ladi — har yangilanishda!). Shu muammoning oldini olish uchun
+            // repo ichiga qo'shilgan bitta doimiy debug.keystore ishlatiladi —
+            // shu bilan barcha kelajakdagi build'lar (qaysi mashinada
+            // qurilishidan qat'i nazar) bir xil imzo bilan chiqadi va
+            // o'rnatilgan versiya ustidan to'g'ridan-to'g'ri yangilanadi.
+            storeFile = file("debug.keystore")
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
         }
     }
 
