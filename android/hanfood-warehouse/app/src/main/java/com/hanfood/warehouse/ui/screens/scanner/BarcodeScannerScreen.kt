@@ -37,12 +37,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalLifecycleOwner
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.content.ContextCompat
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import com.hanfood.warehouse.R
 import com.google.mlkit.vision.barcode.BarcodeScannerOptions
 import com.google.mlkit.vision.barcode.BarcodeScanning
 import com.google.mlkit.vision.barcode.common.Barcode
@@ -80,7 +82,7 @@ fun BarcodeScannerScreen(onResult: (String) -> Unit, onClose: () -> Unit) {
                 .padding(16.dp)
                 .background(Color.Black.copy(alpha = 0.35f), RoundedCornerShape(50))
         ) {
-            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Yopish", tint = Color.White)
+            Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cd_close), tint = Color.White)
         }
     }
 }
@@ -176,7 +178,7 @@ private fun ScannerOverlay() {
                 .border(3.dp, Color.White.copy(alpha = 0.9f), RoundedCornerShape(16.dp))
         )
         Text(
-            "Shtrix-kod yoki QR-kodni ramka ichiga joylashtiring",
+            stringResource(R.string.scanner_hint),
             color = Color.White,
             style = MaterialTheme.typography.bodyMedium,
             modifier = Modifier
@@ -196,18 +198,18 @@ private fun PermissionRationale(onRequest: () -> Unit) {
     ) {
         Icon(Icons.Filled.QrCodeScanner, contentDescription = null, modifier = Modifier.size(56.dp))
         Text(
-            "Skanerlash uchun kameraga ruxsat kerak",
+            stringResource(R.string.scanner_permission_title),
             style = MaterialTheme.typography.titleMedium,
             fontWeight = FontWeight.SemiBold,
             modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
         )
         Text(
-            "Mahsulotlarni shtrix-kod orqali tez topish va faktura tuzish uchun telefon kamerasidan foydalanamiz.",
+            stringResource(R.string.scanner_permission_body),
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         Button(onClick = onRequest, modifier = Modifier.fillMaxWidth().padding(top = 20.dp)) {
-            Text("Ruxsat berish")
+            Text(stringResource(R.string.scanner_permission_grant))
         }
     }
 }

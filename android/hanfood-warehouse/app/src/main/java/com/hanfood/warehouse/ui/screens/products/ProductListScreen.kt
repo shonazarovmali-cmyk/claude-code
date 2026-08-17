@@ -28,10 +28,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Product
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.EmptyState
@@ -52,9 +54,9 @@ fun ProductListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Mahsulotlar", fontWeight = FontWeight.Bold) }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.products_title), fontWeight = FontWeight.Bold) }) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text("Yangi mahsulot") })
+            ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text(stringResource(R.string.products_add)) })
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -67,19 +69,19 @@ fun ProductListScreen(
                     value = query,
                     onValueChange = viewModel::onQueryChange,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Nomi yoki shtrix-kod bo'yicha qidirish") },
+                    placeholder = { Text(stringResource(R.string.products_search_hint)) },
                     leadingIcon = { Icon(Icons.Filled.Search, null) },
                     singleLine = true
                 )
                 IconButton(onClick = onScan) {
-                    Icon(Icons.Filled.QrCodeScanner, contentDescription = "Skanerlash")
+                    Icon(Icons.Filled.QrCodeScanner, contentDescription = stringResource(R.string.cd_scan))
                 }
             }
 
             if (products.isEmpty()) {
                 EmptyState(
-                    title = "Mahsulot topilmadi",
-                    subtitle = "Yangi mahsulot qo'shish uchun pastdagi tugmani bosing yoki qidiruvni tozalang"
+                    title = stringResource(R.string.products_empty_title),
+                    subtitle = stringResource(R.string.products_empty_subtitle)
                 )
             } else {
                 LazyColumn(

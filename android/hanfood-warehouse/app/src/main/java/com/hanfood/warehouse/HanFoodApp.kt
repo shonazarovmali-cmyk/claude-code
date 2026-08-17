@@ -22,5 +22,5 @@ class HanFoodApp : Application() {
      * emas). Real LLM ulash uchun shu joyda [AiEngine]ning boshqa
      * implementatsiyasini qaytarish kifoya.
      */
-    val aiEngine: AiEngine by lazy { LocalAiAnalysisEngine(repository) }
+    val aiEngine: AiEngine by lazy { LocalAiAnalysisEngine(this, repository) }
 }

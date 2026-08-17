@@ -2,10 +2,13 @@ package com.hanfood.warehouse.ui.screens.stock
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.repository.CartLine
 import com.hanfood.warehouse.data.repository.InsufficientStockException
 import com.hanfood.warehouse.data.repository.WarehouseRepository
+import com.hanfood.warehouse.util.UiMessage
+import com.hanfood.warehouse.util.formatQuantity
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
@@ -18,8 +21,8 @@ data class MovementUiState(
     val note: String = "",
     val lines: List<CartLine> = emptyList(),
     val saving: Boolean = false,
-    val error: String? = null,
-    val infoMessage: String? = null,
+    val error: UiMessage? = null,
+    val infoMessage: UiMessage? = null,
     val savedTransactionId: Long? = null
 ) {
     val requiresClient: Boolean get() = type != TransactionType.STOCK_IN
@@ -60,7 +63,7 @@ class MovementViewModel(
             val product = repository.getProductByBarcode(barcode)
             if (product == null) {
                 _state.value = _state.value.copy(
-                    error = "\"$barcode\" kodli mahsulot topilmadi. Avval uni Mahsulotlar bo'limida ro'yxatdan o'tkazing."
+                    error = UiMessage(R.string.error_barcode_not_found, listOf(barcode))
                 )
                 return@launch
             }
@@ -93,7 +96,10 @@ class MovementViewModel(
         } else {
             current + line
         }
-        _state.value = _state.value.copy(lines = updated, infoMessage = "\"${line.productName}\" qo'shildi")
+        _state.value = _state.value.copy(
+            lines = updated,
+            infoMessage = UiMessage(R.string.info_product_added, listOf(line.productName))
+        )
     }
 
     fun updateLineQuantity(productId: Long, quantity: Double) {
@@ -137,9 +143,18 @@ class MovementViewModel(
                 }
                 _state.value = _state.value.copy(saving = false, savedTransactionId = transactionId)
             } catch (e: InsufficientStockException) {
-                _state.value = _state.value.copy(saving = false, error = e.message)
+                _state.value = _state.value.copy(
+                    saving = false,
+                    error = UiMessage(
+                        R.string.error_insufficient_stock,
+                        listOf(e.product.name, formatQuantity(e.product.quantity), formatQuantity(e.requested))
+                    )
+                )
             } catch (e: Exception) {
-                _state.value = _state.value.copy(saving = false, error = "Saqlashda xatolik yuz berdi: ${e.message}")
+                _state.value = _state.value.copy(
+                    saving = false,
+                    error = UiMessage(R.string.error_generic_save, listOf(e.message ?: ""))
+                )
             }
         }
     }

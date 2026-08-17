@@ -19,8 +19,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.security.PinManager
 
 /** Ilova ochilganda ko'rsatiladigan qulf ekrani — PIN yoki barmoq izi bilan. */
@@ -34,6 +36,7 @@ fun PinUnlockScreen(
     var input by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
     val biometricEnabled = pinManager.isBiometricEnabled && biometricAvailable
+    val wrongPinError = stringResource(R.string.pin_unlock_wrong)
 
     LaunchedEffect(Unit) {
         if (biometricEnabled) onRequestBiometric()
@@ -45,9 +48,9 @@ fun PinUnlockScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("HAN FOOD Ombor", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
-                "Davom etish uchun PIN-kodni kiriting",
+                stringResource(R.string.pin_unlock_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp, bottom = 32.dp)
@@ -71,7 +74,7 @@ fun PinUnlockScreen(
                                 if (pinManager.verifyPin(input)) {
                                     onUnlocked()
                                 } else {
-                                    errorText = "PIN-kod noto'g'ri"
+                                    errorText = wrongPinError
                                     input = ""
                                 }
                             }
@@ -84,7 +87,7 @@ fun PinUnlockScreen(
                 IconButton(onClick = onRequestBiometric, modifier = Modifier.padding(top = 20.dp)) {
                     Icon(
                         Icons.Filled.Fingerprint,
-                        contentDescription = "Barmoq izi bilan kirish",
+                        contentDescription = stringResource(R.string.cd_biometric_unlock),
                         tint = MaterialTheme.colorScheme.primary
                     )
                 }

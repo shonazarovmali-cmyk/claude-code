@@ -1,7 +1,9 @@
 package com.hanfood.warehouse.ui.screens.products
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Product
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -40,7 +42,7 @@ data class ProductEditUiState(
     val category: String = "",
     val loaded: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null
+    @StringRes val errorRes: Int? = null
 )
 
 class ProductEditViewModel(
@@ -69,7 +71,7 @@ class ProductEditViewModel(
                         loaded = true
                     )
                 } else {
-                    _state.value = _state.value.copy(loaded = true, error = "Mahsulot topilmadi")
+                    _state.value = _state.value.copy(loaded = true, errorRes = R.string.error_product_not_found)
                 }
             }
         }
@@ -86,7 +88,7 @@ class ProductEditViewModel(
     fun save() {
         val s = _state.value
         if (s.name.isBlank()) {
-            _state.value = s.copy(error = "Mahsulot nomini kiriting")
+            _state.value = s.copy(errorRes = R.string.error_product_name_required)
             return
         }
         viewModelScope.launch {
@@ -103,9 +105,9 @@ class ProductEditViewModel(
             )
             try {
                 repository.upsertProduct(product)
-                _state.value = _state.value.copy(saved = true, error = null)
+                _state.value = _state.value.copy(saved = true, errorRes = null)
             } catch (e: Exception) {
-                _state.value = _state.value.copy(error = "Saqlashda xatolik: bunday shtrix-kod allaqachon mavjud bo'lishi mumkin")
+                _state.value = _state.value.copy(errorRes = R.string.error_product_save_duplicate)
             }
         }
     }

@@ -10,11 +10,8 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
-enum class ReportPeriod(val label: String) {
-    TODAY("Bugun"),
-    WEEK("Shu hafta"),
-    MONTH("Shu oy"),
-    ALL_TIME("Barcha vaqt")
+enum class ReportPeriod {
+    TODAY, WEEK, MONTH, ALL_TIME
 }
 
 data class ReportsUiState(

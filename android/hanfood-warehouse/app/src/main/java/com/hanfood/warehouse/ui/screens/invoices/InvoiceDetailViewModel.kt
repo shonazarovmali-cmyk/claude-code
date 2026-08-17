@@ -13,11 +13,14 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
+/** Whether the counterparty of this invoice is a client or a supplier — resolved to text in the UI layer. */
+enum class CounterpartyKind { CLIENT, SUPPLIER }
+
 data class InvoiceDetailUiState(
     val transaction: StockTransaction? = null,
     val items: List<TransactionItemDetail> = emptyList(),
-    val counterpartyLabel: String = "",
-    val counterpartyName: String = "",
+    val counterpartyKind: CounterpartyKind = CounterpartyKind.SUPPLIER,
+    val counterparty: CounterpartyName = CounterpartyName.NoSupplier,
     val loading: Boolean = true
 )
 
@@ -34,8 +37,8 @@ class InvoiceDetailViewModel(repository: WarehouseRepository, transactionId: Lon
                     InvoiceDetailUiState(
                         transaction = tx,
                         items = items,
-                        counterpartyLabel = "Mijoz",
-                        counterpartyName = client?.name ?: "Noma'lum mijoz",
+                        counterpartyKind = CounterpartyKind.CLIENT,
+                        counterparty = client?.let { CounterpartyName.Known(it.name) } ?: CounterpartyName.UnknownClient,
                         loading = false
                     )
                 }
@@ -43,8 +46,8 @@ class InvoiceDetailViewModel(repository: WarehouseRepository, transactionId: Lon
                     InvoiceDetailUiState(
                         transaction = tx,
                         items = items,
-                        counterpartyLabel = "Ta'minotchi",
-                        counterpartyName = tx.supplierName ?: "Ko'rsatilmagan",
+                        counterpartyKind = CounterpartyKind.SUPPLIER,
+                        counterparty = tx.supplierName?.let { CounterpartyName.Known(it) } ?: CounterpartyName.NoSupplier,
                         loading = false
                     )
                 )

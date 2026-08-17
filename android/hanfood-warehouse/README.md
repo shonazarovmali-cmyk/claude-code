@@ -35,6 +35,11 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   ko'rinishida, Android Keystore bilan shifrlangan xotirada saqlanadi.
 - **Zaxira nusxa**: Sozlamalar bo'limidan bazani fayl sifatida eksport
   qilib, istalgan joyga (Telegram, Google Drive va h.k.) ulashish mumkin.
+- **Ko'p tillilik**: Ilova 7 tilda ishlaydi — **inglizcha, o'zbekcha, ruscha,
+  polyakcha, turkcha, ukraincha va nemischa**. Til qurilma tiliga qarab
+  avtomatik tanlanadi; Sozlamalar → Til bo'limidan qo'lda ham o'zgartirish
+  mumkin (ilovani qayta o'rnatmasdan, darhol qo'llanadi). AI Yordamchi ham
+  tanlangan tilda javob beradi.
 
 ## Texnologiyalar
 
@@ -83,7 +88,7 @@ app/src/main/java/com/hanfood/warehouse/
 │   └── screens/         # dashboard, products, clients, stock (kirim/chiqim/
 │                         # qaytarish), scanner, invoices, reports, assistant,
 │                         # settings, auth (PIN)
-├── util/                # Formatlash, ViewModel factory, PDF/DB eksport
+├── util/                # Formatlash, ViewModel factory, PDF/DB eksport, LanguageManager
 ├── HanFoodApp.kt         # Application — repository/pinManager/aiEngine
 └── MainActivity.kt       # Yagona Activity, Compose Navigation host
 ```
@@ -117,6 +122,23 @@ Agar kelajakda haqiqiy LLM (masalan Claude API) ulashni xohlasangiz:
 Buning uchun internet ruxsati (`INTERNET` permission — hozir ML Kit
 kutubxonasi tomonidan avtomatik qo'shilgan, lekin ishlatilmaydi) va API
 kalitini xavfsiz saqlash kerak bo'ladi.
+
+## Ko'p tillilik arxitekturasi
+
+- Barcha matnlar `res/values*/strings.xml` fayllarida (`values` — inglizcha
+  standart, `values-uz`, `values-ru`, `values-pl`, `values-tr`, `values-uk`,
+  `values-de`). Android qurilma tiliga eng mos keladigan faylni avtomatik
+  tanlaydi.
+- Til tanlash `util/LanguageManager.kt` orqali (`AppCompatDelegate.setApplicationLocales`)
+  — Sozlamalar ekranidagi almashtirish darhol qo'llanadi, ilovani qayta
+  ishga tushirish shart emas.
+- `ai/LocalAiAnalysisEngine.kt` — AI yordamchi javoblari ham `Context.getString(...)`
+  orqali joriy tilda shakllantiriladi. Erkin matn kiritilganda mavzu
+  (kam qoldiq, kirim/chiqim va h.k.) barcha 7 tildagi kalit so'zlar bo'yicha
+  aniqlanadi — foydalanuvchi qaysi tilda yozishidan qat'i nazar tushuniladi.
+- Pul birligi ("so'm") ataylab tarjima qilinmagan — bu O'zbekiston so'mining
+  o'zi, xuddi boshqa ilovalarda "$" yoki "€" belgisi tarjima qilinmagani
+  kabi.
 
 ## Ma'lum cheklovlar / keyingi qadamlar
 

@@ -33,17 +33,22 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.ai.AiEngine
 import com.hanfood.warehouse.util.GenericViewModelFactory
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AiAssistantScreen(engine: AiEngine) {
-    val viewModel: AiAssistantViewModel = viewModel(factory = GenericViewModelFactory { AiAssistantViewModel(engine) })
+    val welcomeMessage = stringResource(R.string.ai_welcome_message)
+    val viewModel: AiAssistantViewModel = viewModel(
+        factory = GenericViewModelFactory { AiAssistantViewModel(engine, welcomeMessage) }
+    )
     val state by viewModel.state.collectAsStateWithLifecycle()
     val listState = rememberLazyListState()
 
@@ -57,7 +62,7 @@ fun AiAssistantScreen(engine: AiEngine) {
                 title = {
                     Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                         Icon(Icons.Filled.SmartToy, contentDescription = null)
-                        Text("AI Yordamchi", fontWeight = FontWeight.Bold)
+                        Text(stringResource(R.string.assistant_title), fontWeight = FontWeight.Bold)
                     }
                 }
             )
@@ -75,7 +80,7 @@ fun AiAssistantScreen(engine: AiEngine) {
                     item {
                         Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                             CircularProgressIndicator(modifier = Modifier.widthIn(max = 16.dp))
-                            Text("Tahlil qilinmoqda...", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(stringResource(R.string.assistant_thinking), color = MaterialTheme.colorScheme.onSurfaceVariant)
                         }
                     }
                 }
@@ -101,11 +106,11 @@ fun AiAssistantScreen(engine: AiEngine) {
                     value = state.input,
                     onValueChange = viewModel::onInputChange,
                     modifier = Modifier.weight(1f),
-                    placeholder = { Text("Savol bering...") },
+                    placeholder = { Text(stringResource(R.string.assistant_input_hint)) },
                     singleLine = true
                 )
                 FilledTonalIconButton(onClick = { viewModel.send() }) {
-                    Icon(Icons.Filled.Send, contentDescription = "Yuborish")
+                    Icon(Icons.Filled.Send, contentDescription = stringResource(R.string.cd_send))
                 }
             }
         }

@@ -17,6 +17,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.padding
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.fragment.app.FragmentActivity
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -25,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.hanfood.warehouse.HanFoodApp
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.security.BiometricHelper
 import com.hanfood.warehouse.ui.screens.assistant.AiAssistantScreen
@@ -44,12 +46,13 @@ import com.hanfood.warehouse.ui.screens.stock.MovementScreen
 
 private data class BottomTab(val route: String, val label: String, val icon: ImageVector)
 
-private val bottomTabs = listOf(
-    BottomTab(Routes.DASHBOARD, "Bosh sahifa", Icons.Filled.Home),
-    BottomTab(Routes.PRODUCTS, "Mahsulotlar", Icons.Filled.Inventory),
-    BottomTab(Routes.CLIENTS, "Mijozlar", Icons.Filled.Groups),
-    BottomTab(Routes.INVOICES, "Fakturalar", Icons.Filled.ReceiptLong),
-    BottomTab(Routes.REPORTS, "Hisobotlar", Icons.Filled.Assessment)
+@Composable
+private fun rememberBottomTabs(): List<BottomTab> = listOf(
+    BottomTab(Routes.DASHBOARD, stringResource(R.string.tab_dashboard), Icons.Filled.Home),
+    BottomTab(Routes.PRODUCTS, stringResource(R.string.tab_products), Icons.Filled.Inventory),
+    BottomTab(Routes.CLIENTS, stringResource(R.string.tab_clients), Icons.Filled.Groups),
+    BottomTab(Routes.INVOICES, stringResource(R.string.tab_invoices), Icons.Filled.ReceiptLong),
+    BottomTab(Routes.REPORTS, stringResource(R.string.tab_reports), Icons.Filled.Assessment)
 )
 
 @Composable
@@ -58,6 +61,7 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
     val repository = app.repository
     val pinManager = app.pinManager
     val aiEngine = app.aiEngine
+    val bottomTabs = rememberBottomTabs()
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
@@ -70,6 +74,10 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
             popUpTo(0) { inclusive = true }
         }
     }
+
+    val appName = stringResource(R.string.app_name)
+    val biometricSubtitle = stringResource(R.string.biometric_prompt_subtitle)
+    val cancelLabel = stringResource(R.string.action_cancel)
 
     Scaffold(
         bottomBar = {
@@ -110,11 +118,11 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
                     onRequestBiometric = {
                         BiometricHelper.prompt(
                             activity = activity,
-                            title = "HAN FOOD Ombor",
-                            subtitle = "Kirish uchun barmoq izingizni tekshiring",
-                            negativeButtonText = "Bekor qilish",
+                            title = appName,
+                            subtitle = biometricSubtitle,
+                            negativeButtonText = cancelLabel,
                             onSuccess = { goToDashboardClearingBackstack() },
-                            onError = { /* Foydalanuvchi PIN bilan davom etadi */ }
+                            onError = { /* User falls back to entering the PIN */ }
                         )
                     }
                 )

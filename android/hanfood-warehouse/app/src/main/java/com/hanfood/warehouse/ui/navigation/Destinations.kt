@@ -34,9 +34,3 @@ object Routes {
     /** Bottom navigatsiya panelidagi asosiy 5 ta bo'lim. */
     val bottomTabs = listOf(DASHBOARD, PRODUCTS, CLIENTS, INVOICES, REPORTS)
 }
-
-enum class MovementUiType(val route: String, val title: String) {
-    STOCK_IN("STOCK_IN", "Kirim qilish"),
-    STOCK_OUT("STOCK_OUT", "Yuk berish"),
-    RETURN("RETURN", "Yuk qaytarish")
-}

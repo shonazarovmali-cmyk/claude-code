@@ -22,15 +22,18 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.ClientActivitySummary
 import com.hanfood.warehouse.data.local.entity.ProductMovementSummary
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.SectionHeader
 import com.hanfood.warehouse.ui.components.StatCard
+import com.hanfood.warehouse.ui.components.reportPeriodLabel
 import com.hanfood.warehouse.ui.theme.DangerRed
 import com.hanfood.warehouse.ui.theme.SuccessGreen
 import com.hanfood.warehouse.ui.theme.WarningAmber
@@ -45,7 +48,7 @@ fun ReportsScreen(repository: WarehouseRepository) {
     val state by viewModel.state.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Hisobotlar", fontWeight = FontWeight.Bold) }) }
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.reports_title), fontWeight = FontWeight.Bold) }) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             LazyRow(
@@ -56,7 +59,7 @@ fun ReportsScreen(repository: WarehouseRepository) {
                     FilterChip(
                         selected = state.period == period,
                         onClick = { viewModel.selectPeriod(period) },
-                        label = { Text(period.label) }
+                        label = { Text(reportPeriodLabel(period)) }
                     )
                 }
             }
@@ -71,16 +74,16 @@ fun ReportsScreen(repository: WarehouseRepository) {
                     item {
                         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                             StatCard(
-                                label = "Kirim",
+                                label = stringResource(R.string.reports_stat_stock_in),
                                 value = formatMoney(summary.stockInAmount),
-                                caption = "${summary.stockInCount} ta faktura",
+                                caption = stringResource(R.string.reports_invoices_count, summary.stockInCount),
                                 accent = SuccessGreen,
                                 modifier = Modifier.weight(1f)
                             )
                             StatCard(
-                                label = "Chiqim",
+                                label = stringResource(R.string.reports_stat_stock_out),
                                 value = formatMoney(summary.stockOutAmount),
-                                caption = "${summary.stockOutCount} ta faktura",
+                                caption = stringResource(R.string.reports_invoices_count, summary.stockOutCount),
                                 accent = WarningAmber,
                                 modifier = Modifier.weight(1f)
                             )
@@ -88,15 +91,15 @@ fun ReportsScreen(repository: WarehouseRepository) {
                     }
                     item {
                         StatCard(
-                            label = "Qaytarish",
+                            label = stringResource(R.string.reports_stat_return),
                             value = formatMoney(summary.returnAmount),
-                            caption = "${summary.returnCount} ta faktura • ${formatQuantity(summary.returnQty)} birlik",
+                            caption = stringResource(R.string.reports_return_caption, summary.returnCount, formatQuantity(summary.returnQty)),
                             accent = DangerRed
                         )
                     }
 
                     if (summary.lowStock.isNotEmpty()) {
-                        item { SectionHeader("Kam qolgan mahsulotlar (${summary.lowStock.size})") }
+                        item { SectionHeader(stringResource(R.string.reports_low_stock_header, summary.lowStock.size)) }
                         items(summary.lowStock) { product ->
                             Card(modifier = Modifier.fillMaxWidth()) {
                                 Row(
@@ -115,17 +118,17 @@ fun ReportsScreen(repository: WarehouseRepository) {
                     }
 
                     if (summary.topOutProducts.isNotEmpty()) {
-                        item { SectionHeader("Eng ko'p berilgan mahsulotlar") }
+                        item { SectionHeader(stringResource(R.string.reports_top_out_header)) }
                         items(summary.topOutProducts) { row -> ProductMovementRow(row) }
                     }
 
                     if (summary.topInProducts.isNotEmpty()) {
-                        item { SectionHeader("Eng ko'p kirim qilingan mahsulotlar") }
+                        item { SectionHeader(stringResource(R.string.reports_top_in_header)) }
                         items(summary.topInProducts) { row -> ProductMovementRow(row) }
                     }
 
                     if (summary.topClients.isNotEmpty()) {
-                        item { SectionHeader("Eng faol mijozlar") }
+                        item { SectionHeader(stringResource(R.string.reports_top_clients_header)) }
                         items(summary.topClients) { row -> ClientActivityRow(row) }
                     }
                 }
@@ -158,7 +161,11 @@ private fun ClientActivityRow(row: ClientActivitySummary) {
         ) {
             Column {
                 Text(row.clientName, fontWeight = FontWeight.Medium)
-                Text("${row.transactionCount} ta faktura", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(
+                    stringResource(R.string.reports_transactions_count, row.transactionCount),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
             Text(formatMoney(row.totalAmount), fontWeight = FontWeight.SemiBold)
         }

@@ -12,7 +12,14 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 
-data class InvoiceRow(val transaction: StockTransaction, val counterpartyName: String)
+/** Either a real client/supplier name, or a localizable fallback resolved in the UI layer. */
+sealed class CounterpartyName {
+    data class Known(val name: String) : CounterpartyName()
+    data object UnknownClient : CounterpartyName()
+    data object NoSupplier : CounterpartyName()
+}
+
+data class InvoiceRow(val transaction: StockTransaction, val counterparty: CounterpartyName)
 
 class InvoiceListViewModel(repository: WarehouseRepository) : ViewModel() {
 
@@ -24,12 +31,12 @@ class InvoiceListViewModel(repository: WarehouseRepository) : ViewModel() {
     val rows: StateFlow<List<InvoiceRow>> = combine(transactions, repository.clients) { txs, clients ->
         val clientMap = clients.associateBy { it.id }
         txs.map { tx ->
-            val name = when {
-                tx.clientId != null -> clientMap[tx.clientId]?.name ?: "Noma'lum mijoz"
-                !tx.supplierName.isNullOrBlank() -> tx.supplierName
-                else -> "Ta'minotchi ko'rsatilmagan"
+            val counterparty = when {
+                tx.clientId != null -> clientMap[tx.clientId]?.let { CounterpartyName.Known(it.name) } ?: CounterpartyName.UnknownClient
+                !tx.supplierName.isNullOrBlank() -> CounterpartyName.Known(tx.supplierName)
+                else -> CounterpartyName.NoSupplier
             }
-            InvoiceRow(tx, name)
+            InvoiceRow(tx, counterparty)
         }
     }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
 

@@ -25,10 +25,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Client
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.EmptyState
@@ -46,9 +48,9 @@ fun ClientListScreen(
     val query by viewModel.query.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Mijozlar", fontWeight = FontWeight.Bold) }) },
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.clients_title), fontWeight = FontWeight.Bold) }) },
         floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text("Yangi mijoz") })
+            ExtendedFloatingActionButton(onClick = onAdd, icon = { Icon(Icons.Filled.Add, null) }, text = { Text(stringResource(R.string.clients_add)) })
         }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -56,13 +58,13 @@ fun ClientListScreen(
                 value = query,
                 onValueChange = viewModel::onQueryChange,
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                placeholder = { Text("Ism yoki telefon bo'yicha qidirish") },
+                placeholder = { Text(stringResource(R.string.clients_search_hint)) },
                 leadingIcon = { Icon(Icons.Filled.Search, null) },
                 singleLine = true
             )
 
             if (clients.isEmpty()) {
-                EmptyState(title = "Mijoz topilmadi", subtitle = "Yangi mijoz qo'shish uchun pastdagi tugmani bosing")
+                EmptyState(title = stringResource(R.string.clients_empty_title), subtitle = stringResource(R.string.clients_empty_subtitle))
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),

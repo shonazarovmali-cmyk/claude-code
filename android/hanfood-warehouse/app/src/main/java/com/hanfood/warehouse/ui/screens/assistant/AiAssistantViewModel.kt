@@ -16,19 +16,10 @@ data class AssistantUiState(
     val input: String = ""
 )
 
-class AiAssistantViewModel(private val engine: AiEngine) : ViewModel() {
+class AiAssistantViewModel(private val engine: AiEngine, welcomeMessage: String) : ViewModel() {
 
     private val _state = MutableStateFlow(
-        AssistantUiState(
-            messages = listOf(
-                ChatMessage(
-                    text = "Assalomu alaykum! Men HAN FOOD ombor bo'yicha AI yordamchiman. " +
-                        "Qoldiqlar, kirim-chiqim va mijozlar haqida savol bering — javobni to'g'ridan-to'g'ri " +
-                        "ombor ma'lumotlaridan hisoblab beraman.",
-                    isUser = false
-                )
-            )
-        )
+        AssistantUiState(messages = listOf(ChatMessage(text = welcomeMessage, isUser = false)))
     )
     val state: StateFlow<AssistantUiState> = _state.asStateFlow()
 

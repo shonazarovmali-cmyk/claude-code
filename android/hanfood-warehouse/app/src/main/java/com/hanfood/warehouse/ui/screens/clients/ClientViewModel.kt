@@ -1,7 +1,9 @@
 package com.hanfood.warehouse.ui.screens.clients
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.Client
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -36,7 +38,7 @@ data class ClientEditUiState(
     val note: String = "",
     val loaded: Boolean = false,
     val saved: Boolean = false,
-    val error: String? = null
+    @StringRes val errorRes: Int? = null
 )
 
 class ClientEditViewModel(
@@ -61,7 +63,7 @@ class ClientEditViewModel(
                         loaded = true
                     )
                 } else {
-                    _state.value = _state.value.copy(loaded = true, error = "Mijoz topilmadi")
+                    _state.value = _state.value.copy(loaded = true, errorRes = R.string.error_client_not_found)
                 }
             }
         }
@@ -74,7 +76,7 @@ class ClientEditViewModel(
     fun save() {
         val s = _state.value
         if (s.name.isBlank()) {
-            _state.value = s.copy(error = "Mijoz nomini kiriting")
+            _state.value = s.copy(errorRes = R.string.error_client_name_required)
             return
         }
         viewModelScope.launch {
@@ -87,7 +89,7 @@ class ClientEditViewModel(
                     note = s.note.trim().ifBlank { null }
                 )
             )
-            _state.value = _state.value.copy(saved = true, error = null)
+            _state.value = _state.value.copy(saved = true, errorRes = null)
         }
     }
 }

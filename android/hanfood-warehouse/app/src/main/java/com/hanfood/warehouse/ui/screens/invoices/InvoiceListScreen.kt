@@ -22,13 +22,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.EmptyState
+import com.hanfood.warehouse.ui.components.transactionTypeLabel
 import com.hanfood.warehouse.ui.theme.DangerRed
 import com.hanfood.warehouse.ui.theme.SuccessGreen
 import com.hanfood.warehouse.ui.theme.WarningAmber
@@ -47,21 +50,21 @@ fun InvoiceListScreen(
     val selectedType by viewModel.selectedType.collectAsStateWithLifecycle()
 
     Scaffold(
-        topBar = { CenterAlignedTopAppBar(title = { Text("Fakturalar", fontWeight = FontWeight.Bold) }) }
+        topBar = { CenterAlignedTopAppBar(title = { Text(stringResource(R.string.invoices_title), fontWeight = FontWeight.Bold) }) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Row(
                 modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                FilterChip(selected = selectedType == null, onClick = { viewModel.selectType(null) }, label = { Text("Barchasi") })
-                FilterChip(selected = selectedType == TransactionType.STOCK_IN, onClick = { viewModel.selectType(TransactionType.STOCK_IN) }, label = { Text("Kirim") })
-                FilterChip(selected = selectedType == TransactionType.STOCK_OUT, onClick = { viewModel.selectType(TransactionType.STOCK_OUT) }, label = { Text("Chiqim") })
-                FilterChip(selected = selectedType == TransactionType.RETURN, onClick = { viewModel.selectType(TransactionType.RETURN) }, label = { Text("Qaytarish") })
+                FilterChip(selected = selectedType == null, onClick = { viewModel.selectType(null) }, label = { Text(stringResource(R.string.filter_all)) })
+                FilterChip(selected = selectedType == TransactionType.STOCK_IN, onClick = { viewModel.selectType(TransactionType.STOCK_IN) }, label = { Text(stringResource(R.string.transaction_type_stock_in)) })
+                FilterChip(selected = selectedType == TransactionType.STOCK_OUT, onClick = { viewModel.selectType(TransactionType.STOCK_OUT) }, label = { Text(stringResource(R.string.transaction_type_stock_out)) })
+                FilterChip(selected = selectedType == TransactionType.RETURN, onClick = { viewModel.selectType(TransactionType.RETURN) }, label = { Text(stringResource(R.string.transaction_type_return)) })
             }
 
             if (rows.isEmpty()) {
-                EmptyState(title = "Faktura topilmadi", subtitle = "Kirim, chiqim yoki qaytarish amalga oshirilgach shu yerda ko'rinadi")
+                EmptyState(title = stringResource(R.string.invoices_empty_title), subtitle = stringResource(R.string.invoices_empty_subtitle))
             } else {
                 LazyColumn(
                     contentPadding = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
@@ -77,11 +80,18 @@ fun InvoiceListScreen(
 }
 
 @Composable
+private fun counterpartyText(counterparty: CounterpartyName): String = when (counterparty) {
+    is CounterpartyName.Known -> counterparty.name
+    CounterpartyName.UnknownClient -> stringResource(R.string.counterparty_unknown_client)
+    CounterpartyName.NoSupplier -> stringResource(R.string.counterparty_no_supplier)
+}
+
+@Composable
 private fun InvoiceRowCard(row: InvoiceRow, onClick: () -> Unit) {
-    val (label, color) = when (row.transaction.type) {
-        TransactionType.STOCK_IN -> "Kirim" to SuccessGreen
-        TransactionType.STOCK_OUT -> "Chiqim" to WarningAmber
-        TransactionType.RETURN -> "Qaytarish" to DangerRed
+    val color = when (row.transaction.type) {
+        TransactionType.STOCK_IN -> SuccessGreen
+        TransactionType.STOCK_OUT -> WarningAmber
+        TransactionType.RETURN -> DangerRed
     }
     Card(modifier = Modifier.fillMaxWidth(), onClick = onClick) {
         Row(
@@ -91,11 +101,11 @@ private fun InvoiceRowCard(row: InvoiceRow, onClick: () -> Unit) {
         ) {
             Column(modifier = Modifier.weight(1f)) {
                 Text(row.transaction.invoiceNumber, fontWeight = FontWeight.SemiBold)
-                Text(row.counterpartyName, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                Text(counterpartyText(row.counterparty), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(formatDateTime(row.transaction.date), style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
             Column(horizontalAlignment = Alignment.End) {
-                TypeBadge(label, color)
+                TypeBadge(transactionTypeLabel(row.transaction.type), color)
                 Text(formatMoney(row.transaction.totalAmount), fontWeight = FontWeight.Bold, modifier = Modifier.padding(top = 6.dp))
             }
         }

@@ -33,14 +33,16 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.StockTransaction
-import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.StatCard
+import com.hanfood.warehouse.ui.components.transactionTypeLabel
 import com.hanfood.warehouse.util.GenericViewModelFactory
 import com.hanfood.warehouse.util.formatDateTime
 import com.hanfood.warehouse.util.formatMoney
@@ -62,10 +64,10 @@ fun DashboardScreen(
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
-                title = { Text("HAN FOOD Ombor", fontWeight = FontWeight.Bold) },
+                title = { Text(stringResource(R.string.app_name), fontWeight = FontWeight.Bold) },
                 actions = {
                     IconButton(onClick = onSettings) {
-                        Icon(Icons.Filled.Settings, contentDescription = "Sozlamalar")
+                        Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.cd_settings))
                     }
                 }
             )
@@ -76,7 +78,7 @@ fun DashboardScreen(
             contentPadding = PaddingValues(horizontal = 16.dp, vertical = 12.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            item { StatsGrid(state, padding) }
+            item { StatsGrid(state) }
 
             if (state.lowStock.isNotEmpty()) {
                 item { LowStockBanner(count = state.lowStock.size) }
@@ -84,7 +86,7 @@ fun DashboardScreen(
 
             item {
                 Text(
-                    "Tezkor amallar",
+                    stringResource(R.string.dashboard_quick_actions),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 4.dp)
@@ -94,7 +96,7 @@ fun DashboardScreen(
 
             item {
                 Text(
-                    "So'nggi harakatlar",
+                    stringResource(R.string.dashboard_recent_transactions),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.SemiBold,
                     modifier = Modifier.padding(top = 4.dp)
@@ -103,7 +105,7 @@ fun DashboardScreen(
             if (state.recentTransactions.isEmpty()) {
                 item {
                     Text(
-                        "Hali hech qanday harakat qayd etilmagan",
+                        stringResource(R.string.dashboard_no_transactions_yet),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
@@ -118,16 +120,16 @@ fun DashboardScreen(
 }
 
 @Composable
-private fun StatsGrid(state: DashboardUiState, outerPadding: PaddingValues) {
+private fun StatsGrid(state: DashboardUiState) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             StatCard(
-                label = "Ombor qiymati",
+                label = stringResource(R.string.dashboard_stat_stock_value),
                 value = formatMoney(state.totalStockValue),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = "Jami dona/birlik",
+                label = stringResource(R.string.dashboard_stat_total_units),
                 value = formatQuantity(state.totalUnits),
                 modifier = Modifier.weight(1f),
                 accent = MaterialTheme.colorScheme.secondary
@@ -135,12 +137,12 @@ private fun StatsGrid(state: DashboardUiState, outerPadding: PaddingValues) {
         }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             StatCard(
-                label = "Mahsulot turlari",
+                label = stringResource(R.string.dashboard_stat_product_types),
                 value = state.productCount.toString(),
                 modifier = Modifier.weight(1f)
             )
             StatCard(
-                label = "Mijozlar",
+                label = stringResource(R.string.dashboard_stat_clients),
                 value = state.clientCount.toString(),
                 modifier = Modifier.weight(1f),
                 accent = MaterialTheme.colorScheme.secondary
@@ -159,7 +161,7 @@ private fun LowStockBanner(count: Int) {
         ) {
             Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
             Text(
-                "$count ta mahsulot kam qolgan — Hisobotlar bo'limidan ko'ring",
+                stringResource(R.string.dashboard_low_stock_banner, count),
                 color = MaterialTheme.colorScheme.onErrorContainer,
                 style = MaterialTheme.typography.bodyMedium
             )
@@ -167,16 +169,16 @@ private fun LowStockBanner(count: Int) {
     }
 }
 
-private data class QuickAction(val title: String, val icon: ImageVector, val action: String)
+private data class QuickAction(val titleRes: Int, val icon: ImageVector, val action: String)
 
 @Composable
 private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> Unit, onAssistant: () -> Unit) {
     val actions = listOf(
-        QuickAction("Kirim qilish", Icons.Filled.Inventory2, "STOCK_IN"),
-        QuickAction("Yuk berish", Icons.Filled.LocalShipping, "STOCK_OUT"),
-        QuickAction("Qaytarish", Icons.Filled.Undo, "RETURN"),
-        QuickAction("Skanerlash", Icons.Filled.QrCodeScanner, "SCAN"),
-        QuickAction("AI Yordamchi", Icons.Filled.SmartToy, "ASSISTANT")
+        QuickAction(R.string.quick_action_stock_in, Icons.Filled.Inventory2, "STOCK_IN"),
+        QuickAction(R.string.quick_action_stock_out, Icons.Filled.LocalShipping, "STOCK_OUT"),
+        QuickAction(R.string.quick_action_return, Icons.Filled.Undo, "RETURN"),
+        QuickAction(R.string.quick_action_scan, Icons.Filled.QrCodeScanner, "SCAN"),
+        QuickAction(R.string.quick_action_assistant, Icons.Filled.SmartToy, "ASSISTANT")
     )
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
@@ -185,6 +187,7 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
         modifier = Modifier.aspectRatio(1.55f)
     ) {
         items(actions) { action ->
+            val title = stringResource(action.titleRes)
             Card(
                 modifier = Modifier.fillMaxWidth().aspectRatio(1f),
                 onClick = {
@@ -201,9 +204,9 @@ private fun QuickActionsGrid(onQuickAction: (String) -> Unit, onScanner: () -> U
                     horizontalAlignment = androidx.compose.ui.Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center
                 ) {
-                    Icon(action.icon, contentDescription = action.title, tint = MaterialTheme.colorScheme.onPrimaryContainer)
+                    Icon(action.icon, contentDescription = title, tint = MaterialTheme.colorScheme.onPrimaryContainer)
                     Text(
-                        action.title,
+                        title,
                         style = MaterialTheme.typography.labelMedium,
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center,
@@ -226,7 +229,7 @@ private fun RecentTransactionRow(tx: StockTransaction, onClick: () -> Unit) {
             Column {
                 Text(tx.invoiceNumber, fontWeight = FontWeight.SemiBold)
                 Text(
-                    typeLabel(tx.type) + " • " + formatDateTime(tx.date),
+                    transactionTypeLabel(tx.type) + " • " + formatDateTime(tx.date),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -234,10 +237,4 @@ private fun RecentTransactionRow(tx: StockTransaction, onClick: () -> Unit) {
             Text(formatMoney(tx.totalAmount), fontWeight = FontWeight.Medium)
         }
     }
-}
-
-private fun typeLabel(type: TransactionType): String = when (type) {
-    TransactionType.STOCK_IN -> "Kirim"
-    TransactionType.STOCK_OUT -> "Chiqim"
-    TransactionType.RETURN -> "Qaytarish"
 }

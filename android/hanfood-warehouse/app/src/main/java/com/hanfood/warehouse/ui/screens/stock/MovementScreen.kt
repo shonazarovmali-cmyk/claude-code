@@ -29,7 +29,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -43,17 +42,20 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.local.entity.TransactionType
 import com.hanfood.warehouse.data.repository.CartLine
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
-import com.hanfood.warehouse.ui.navigation.MovementUiType
+import com.hanfood.warehouse.ui.components.movementScreenTitle
 import com.hanfood.warehouse.ui.navigation.ScannerBus
 import com.hanfood.warehouse.util.GenericViewModelFactory
+import com.hanfood.warehouse.util.UiMessage
 import com.hanfood.warehouse.util.formatMoney
 import kotlinx.coroutines.launch
 
@@ -86,31 +88,30 @@ fun MovementScreen(
     LaunchedEffect(state.savedTransactionId) {
         state.savedTransactionId?.let { onSaved(it) }
     }
-    LaunchedEffect(state.error, state.infoMessage) {
-        val message = state.error ?: state.infoMessage
-        if (message != null) {
-            scope.launch { snackbarHostState.showSnackbar(message) }
+    val message = state.error ?: state.infoMessage
+    val messageText = message?.let { resolveMessage(it) }
+    LaunchedEffect(messageText) {
+        if (messageText != null) {
+            scope.launch { snackbarHostState.showSnackbar(messageText) }
             viewModel.dismissMessages()
         }
     }
 
-    val title = MovementUiType.entries.first { it.route == movementType.name }.title
-
     Scaffold(
-        topBar = { BackTopBar(title = title, onBack = onBack) },
+        topBar = { BackTopBar(title = movementScreenTitle(movementType), onBack = onBack) },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding)) {
             Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
                 if (state.requiresClient) {
                     OutlinedButton(onClick = { showClientPicker = true }, modifier = Modifier.fillMaxWidth()) {
-                        Text(state.clientName.ifBlank { "Mijozni tanlang *" })
+                        Text(state.clientName.ifBlank { stringResource(R.string.movement_client_select) })
                     }
                 } else {
                     OutlinedTextField(
                         value = state.supplierName,
                         onValueChange = viewModel::setSupplierName,
-                        label = { Text("Ta'minotchi (ixtiyoriy)") },
+                        label = { Text(stringResource(R.string.movement_supplier_optional)) },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true
                     )
@@ -119,10 +120,10 @@ fun MovementScreen(
                 Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
                     Button(onClick = onScan, modifier = Modifier.weight(1f)) {
                         Icon(Icons.Filled.QrCodeScanner, contentDescription = null)
-                        Text("  Skanerlash")
+                        Text("  " + stringResource(R.string.action_scan))
                     }
                     OutlinedButton(onClick = { showProductPicker = true }, modifier = Modifier.weight(1f)) {
-                        Text("Qo'lda tanlash")
+                        Text(stringResource(R.string.action_pick_manually))
                     }
                 }
             }
@@ -132,7 +133,7 @@ fun MovementScreen(
             if (state.lines.isEmpty()) {
                 Box(modifier = Modifier.fillMaxWidth().padding(32.dp), contentAlignment = Alignment.Center) {
                     Text(
-                        "Faktura bo'sh — mahsulot qo'shish uchun skanerlang yoki ro'yxatdan tanlang",
+                        stringResource(R.string.movement_cart_empty),
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         textAlign = androidx.compose.ui.text.style.TextAlign.Center
                     )
@@ -158,11 +159,11 @@ fun MovementScreen(
                 OutlinedTextField(
                     value = state.note,
                     onValueChange = viewModel::setNote,
-                    label = { Text("Izoh (ixtiyoriy)") },
+                    label = { Text(stringResource(R.string.movement_field_note)) },
                     modifier = Modifier.fillMaxWidth()
                 )
                 Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
-                    Text("Jami:", style = MaterialTheme.typography.titleMedium)
+                    Text(stringResource(R.string.movement_total_label), style = MaterialTheme.typography.titleMedium)
                     Text(formatMoney(state.total), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
                 }
                 Button(
@@ -173,7 +174,7 @@ fun MovementScreen(
                     if (state.saving) {
                         CircularProgressIndicator(modifier = Modifier.heightIn(max = 20.dp), color = MaterialTheme.colorScheme.onPrimary)
                     } else {
-                        Text("Saqlash")
+                        Text(stringResource(R.string.action_save_invoice))
                     }
                 }
             }
@@ -205,6 +206,9 @@ fun MovementScreen(
 }
 
 @Composable
+private fun resolveMessage(message: UiMessage): String = stringResource(message.res, *message.args.toTypedArray())
+
+@Composable
 private fun CartLineRow(
     line: CartLine,
     onQuantityChange: (Double) -> Unit,
@@ -220,14 +224,14 @@ private fun CartLineRow(
             ) {
                 Text(line.productName, fontWeight = FontWeight.SemiBold, modifier = Modifier.weight(1f))
                 IconButton(onClick = onRemove) {
-                    Icon(Icons.Filled.Delete, contentDescription = "O'chirish", tint = MaterialTheme.colorScheme.error)
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.cd_delete), tint = MaterialTheme.colorScheme.error)
                 }
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
                 OutlinedTextField(
                     value = if (line.quantity == line.quantity.toLong().toDouble()) line.quantity.toLong().toString() else line.quantity.toString(),
                     onValueChange = { it.toDoubleOrNull()?.let(onQuantityChange) },
-                    label = { Text("Miqdor (${line.unit})") },
+                    label = { Text(stringResource(R.string.cart_field_quantity, line.unit)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -235,14 +239,14 @@ private fun CartLineRow(
                 OutlinedTextField(
                     value = if (line.unitPrice == line.unitPrice.toLong().toDouble()) line.unitPrice.toLong().toString() else line.unitPrice.toString(),
                     onValueChange = { it.toDoubleOrNull()?.let(onPriceChange) },
-                    label = { Text("Narxi") },
+                    label = { Text(stringResource(R.string.cart_field_price)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             }
             Text(
-                "Jami: ${formatMoney(line.quantity * line.unitPrice)}",
+                stringResource(R.string.cart_line_total, formatMoney(line.quantity * line.unitPrice)),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
@@ -264,14 +268,14 @@ private fun ProductPickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Mahsulot tanlash") },
+        title = { Text(stringResource(R.string.movement_picker_products_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Qidirish") },
+                    placeholder = { Text(stringResource(R.string.movement_picker_search)) },
                     singleLine = true
                 )
                 LazyColumn(modifier = Modifier.heightIn(max = 360.dp).padding(top = 8.dp)) {
@@ -298,7 +302,7 @@ private fun ProductPickerDialog(
             }
         },
         confirmButton = {
-            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = "Yopish") }
+            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cd_close)) }
         }
     )
 }
@@ -315,19 +319,19 @@ private fun ClientPickerDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Mijoz tanlash") },
+        title = { Text(stringResource(R.string.movement_picker_clients_title)) },
         text = {
             Column {
                 OutlinedTextField(
                     value = query,
                     onValueChange = { query = it },
                     modifier = Modifier.fillMaxWidth(),
-                    placeholder = { Text("Qidirish") },
+                    placeholder = { Text(stringResource(R.string.movement_picker_search)) },
                     singleLine = true
                 )
                 if (clients.isEmpty()) {
                     Text(
-                        "Mijoz topilmadi. Avval Mijozlar bo'limidan qo'shing.",
+                        stringResource(R.string.movement_picker_no_clients),
                         modifier = Modifier.padding(top = 12.dp),
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -346,8 +350,7 @@ private fun ClientPickerDialog(
             }
         },
         confirmButton = {
-            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = "Yopish") }
+            IconButton(onClick = onDismiss) { Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.cd_close)) }
         }
     )
 }
-

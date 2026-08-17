@@ -18,9 +18,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.util.GenericViewModelFactory
@@ -42,7 +44,12 @@ fun ClientEditScreen(
     }
 
     Scaffold(
-        topBar = { BackTopBar(title = if (clientId == 0L) "Yangi mijoz" else "Mijozni tahrirlash", onBack = onBack) }
+        topBar = {
+            BackTopBar(
+                title = stringResource(if (clientId == 0L) R.string.client_edit_title_new else R.string.client_edit_title_edit),
+                onBack = onBack
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -55,14 +62,14 @@ fun ClientEditScreen(
             OutlinedTextField(
                 value = state.name,
                 onValueChange = { v -> viewModel.update { it.copy(name = v) } },
-                label = { Text("Mijoz nomi *") },
+                label = { Text(stringResource(R.string.client_field_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
             OutlinedTextField(
                 value = state.phone,
                 onValueChange = { v -> viewModel.update { it.copy(phone = v) } },
-                label = { Text("Telefon raqami") },
+                label = { Text(stringResource(R.string.client_field_phone)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone)
@@ -70,22 +77,23 @@ fun ClientEditScreen(
             OutlinedTextField(
                 value = state.address,
                 onValueChange = { v -> viewModel.update { it.copy(address = v) } },
-                label = { Text("Manzil") },
+                label = { Text(stringResource(R.string.client_field_address)) },
                 modifier = Modifier.fillMaxWidth()
             )
             OutlinedTextField(
                 value = state.note,
                 onValueChange = { v -> viewModel.update { it.copy(note = v) } },
-                label = { Text("Izoh (ixtiyoriy)") },
+                label = { Text(stringResource(R.string.client_field_note)) },
                 modifier = Modifier.fillMaxWidth()
             )
 
-            if (state.error != null) {
-                Text(state.error!!, color = MaterialTheme.colorScheme.error)
+            val errorRes = state.errorRes
+            if (errorRes != null) {
+                Text(stringResource(errorRes), color = MaterialTheme.colorScheme.error)
             }
 
             Button(onClick = { viewModel.save() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Saqlash")
+                Text(stringResource(R.string.action_save))
             }
         }
     }

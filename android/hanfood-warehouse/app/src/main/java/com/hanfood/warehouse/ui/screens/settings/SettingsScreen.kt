@@ -8,11 +8,14 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -21,14 +24,18 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.hanfood.warehouse.BuildConfig
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.security.BiometricHelper
 import com.hanfood.warehouse.security.PinManager
 import com.hanfood.warehouse.ui.components.BackTopBar
+import com.hanfood.warehouse.util.AppLanguage
 import com.hanfood.warehouse.util.DatabaseExporter
+import com.hanfood.warehouse.util.LanguageManager
 
 @Composable
 fun SettingsScreen(
@@ -40,12 +47,27 @@ fun SettingsScreen(
     val activity = context as? FragmentActivity
     val biometricAvailable = activity?.let { BiometricHelper.isAvailable(it) } ?: false
     var biometricEnabled by remember { mutableStateOf(pinManager.isBiometricEnabled) }
+    var showLanguageDialog by remember { mutableStateOf(false) }
+    var currentLanguage by remember { mutableStateOf(LanguageManager.currentLanguage()) }
+    val backupShareTitle = stringResource(R.string.settings_backup_share_title)
 
-    Scaffold(topBar = { BackTopBar(title = "Sozlamalar", onBack = onBack) }) { padding ->
+    Scaffold(topBar = { BackTopBar(title = stringResource(R.string.settings_title), onBack = onBack) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
 
-            SettingsSection(title = "Xavfsizlik") {
-                SettingsRow(title = "PIN-kodni o'zgartirish", subtitle = "4 xonali kirish kodi", onClick = onChangePin)
+            SettingsSection(title = stringResource(R.string.settings_section_language)) {
+                SettingsRow(
+                    title = stringResource(R.string.settings_section_language),
+                    subtitle = currentLanguage.displayName.ifBlank { stringResource(R.string.settings_language_system) },
+                    onClick = { showLanguageDialog = true }
+                )
+            }
+
+            SettingsSection(title = stringResource(R.string.settings_section_security)) {
+                SettingsRow(
+                    title = stringResource(R.string.settings_change_pin),
+                    subtitle = stringResource(R.string.settings_change_pin_subtitle),
+                    onClick = onChangePin
+                )
                 if (biometricAvailable) {
                     Row(
                         modifier = Modifier.fillMaxWidth().padding(vertical = 12.dp),
@@ -53,9 +75,9 @@ fun SettingsScreen(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Column {
-                            Text("Barmoq izi bilan kirish")
+                            Text(stringResource(R.string.settings_biometric_title))
                             Text(
-                                "PIN o'rniga biometrik autentifikatsiyadan foydalanish",
+                                stringResource(R.string.settings_biometric_subtitle),
                                 style = MaterialTheme.typography.labelMedium,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
@@ -71,10 +93,10 @@ fun SettingsScreen(
                 }
             }
 
-            SettingsSection(title = "Ma'lumotlar") {
+            SettingsSection(title = stringResource(R.string.settings_section_data)) {
                 SettingsRow(
-                    title = "Zaxira nusxa yaratish",
-                    subtitle = "Ombor bazasini fayl sifatida ulashish (Telegram, Drive va h.k.)",
+                    title = stringResource(R.string.settings_backup),
+                    subtitle = stringResource(R.string.settings_backup_subtitle),
                     onClick = {
                         val uri = DatabaseExporter.exportDatabase(context) ?: return@SettingsRow
                         val intent = Intent(Intent.ACTION_SEND).apply {
@@ -82,15 +104,18 @@ fun SettingsScreen(
                             putExtra(Intent.EXTRA_STREAM, uri)
                             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                         }
-                        context.startActivity(Intent.createChooser(intent, "Zaxira nusxani ulashish"))
+                        context.startActivity(Intent.createChooser(intent, backupShareTitle))
                     }
                 )
             }
 
-            SettingsSection(title = "Ilova haqida") {
-                Text("HAN FOOD Ombor v${BuildConfig.VERSION_NAME}", style = MaterialTheme.typography.bodyMedium)
+            SettingsSection(title = stringResource(R.string.settings_section_about)) {
                 Text(
-                    "Yuk kirim-chiqimi, mijozlar, fakturalar, hisobotlar, shtrix-kod skaneri va AI tahlil yordamchisi bilan ombor boshqaruvi. Barcha ma'lumotlar shu qurilmada, internetsiz saqlanadi.",
+                    stringResource(R.string.settings_about_version, BuildConfig.VERSION_NAME),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    stringResource(R.string.settings_about_body),
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 6.dp)
@@ -98,6 +123,51 @@ fun SettingsScreen(
             }
         }
     }
+
+    if (showLanguageDialog) {
+        LanguageDialog(
+            current = currentLanguage,
+            onDismiss = { showLanguageDialog = false },
+            onSelect = { language ->
+                LanguageManager.setLanguage(language)
+                currentLanguage = language
+                showLanguageDialog = false
+            }
+        )
+    }
+}
+
+@Composable
+private fun LanguageDialog(
+    current: AppLanguage,
+    onDismiss: () -> Unit,
+    onSelect: (AppLanguage) -> Unit
+) {
+    val systemLabel = stringResource(R.string.settings_language_system)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_language_dialog_title)) },
+        text = {
+            Column {
+                AppLanguage.entries.forEach { language ->
+                    val label = if (language == AppLanguage.SYSTEM) systemLabel else language.displayName
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { onSelect(language) }
+                            .padding(vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        RadioButton(selected = current == language, onClick = { onSelect(language) })
+                        Text(label, modifier = Modifier.padding(start = 4.dp))
+                    }
+                }
+            }
+        },
+        confirmButton = {
+            TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_close)) }
+        }
+    )
 }
 
 @Composable

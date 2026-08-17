@@ -23,9 +23,11 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.ui.navigation.ScannerBus
@@ -56,7 +58,12 @@ fun ProductEditScreen(
     }
 
     Scaffold(
-        topBar = { BackTopBar(title = if (productId == 0L) "Yangi mahsulot" else "Mahsulotni tahrirlash", onBack = onBack) }
+        topBar = {
+            BackTopBar(
+                title = stringResource(if (productId == 0L) R.string.product_edit_title_new else R.string.product_edit_title_edit),
+                onBack = onBack
+            )
+        }
     ) { padding ->
         Column(
             modifier = Modifier
@@ -69,7 +76,7 @@ fun ProductEditScreen(
             OutlinedTextField(
                 value = state.name,
                 onValueChange = { v -> viewModel.update { it.copy(name = v) } },
-                label = { Text("Mahsulot nomi *") },
+                label = { Text(stringResource(R.string.product_field_name)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -78,19 +85,19 @@ fun ProductEditScreen(
                 OutlinedTextField(
                     value = state.barcode,
                     onValueChange = { v -> viewModel.update { it.copy(barcode = v) } },
-                    label = { Text("Shtrix-kod / QR-kod") },
+                    label = { Text(stringResource(R.string.product_field_barcode)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true
                 )
                 IconButton(onClick = onScan) {
-                    Icon(Icons.Filled.QrCodeScanner, contentDescription = "Skanerlash")
+                    Icon(Icons.Filled.QrCodeScanner, contentDescription = stringResource(R.string.cd_scan))
                 }
             }
 
             OutlinedTextField(
                 value = state.unit,
                 onValueChange = { v -> viewModel.update { it.copy(unit = v) } },
-                label = { Text("O'lchov birligi (dona, kg, quti ...)") },
+                label = { Text(stringResource(R.string.product_field_unit)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -99,7 +106,7 @@ fun ProductEditScreen(
                 OutlinedTextField(
                     value = state.quantity,
                     onValueChange = { v -> viewModel.update { it.copy(quantity = v) } },
-                    label = { Text("Joriy qoldiq") },
+                    label = { Text(stringResource(R.string.product_field_quantity)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -107,7 +114,7 @@ fun ProductEditScreen(
                 OutlinedTextField(
                     value = state.minQuantity,
                     onValueChange = { v -> viewModel.update { it.copy(minQuantity = v) } },
-                    label = { Text("Minimal qoldiq") },
+                    label = { Text(stringResource(R.string.product_field_min_quantity)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -118,7 +125,7 @@ fun ProductEditScreen(
                 OutlinedTextField(
                     value = state.purchasePrice,
                     onValueChange = { v -> viewModel.update { it.copy(purchasePrice = v) } },
-                    label = { Text("Tannarx (so'm)") },
+                    label = { Text(stringResource(R.string.product_field_purchase_price)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -126,7 +133,7 @@ fun ProductEditScreen(
                 OutlinedTextField(
                     value = state.sellPrice,
                     onValueChange = { v -> viewModel.update { it.copy(sellPrice = v) } },
-                    label = { Text("Sotish narxi (so'm)") },
+                    label = { Text(stringResource(R.string.product_field_sell_price)) },
                     modifier = Modifier.weight(1f),
                     singleLine = true,
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
@@ -136,17 +143,18 @@ fun ProductEditScreen(
             OutlinedTextField(
                 value = state.category,
                 onValueChange = { v -> viewModel.update { it.copy(category = v) } },
-                label = { Text("Toifa (ixtiyoriy)") },
+                label = { Text(stringResource(R.string.product_field_category)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
 
-            if (state.error != null) {
-                Text(state.error!!, color = MaterialTheme.colorScheme.error)
+            val errorRes = state.errorRes
+            if (errorRes != null) {
+                Text(stringResource(errorRes), color = MaterialTheme.colorScheme.error)
             }
 
             Button(onClick = { viewModel.save() }, modifier = Modifier.fillMaxWidth()) {
-                Text("Saqlash")
+                Text(stringResource(R.string.action_save))
             }
         }
     }

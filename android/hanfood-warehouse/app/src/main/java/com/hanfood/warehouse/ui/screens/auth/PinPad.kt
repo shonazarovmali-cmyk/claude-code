@@ -22,8 +22,10 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hanfood.warehouse.R
 
 /** 4 xonali PIN uchun nuqta indikatori. */
 @Composable
@@ -69,7 +71,7 @@ fun NumericKeypad(
             KeypadButton(text = "0", modifier = Modifier.weight(1f)) { onDigit('0') }
             Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.Center) {
                 IconButton(onClick = onBackspace) {
-                    Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = "O'chirish")
+                    Icon(Icons.AutoMirrored.Filled.Backspace, contentDescription = stringResource(R.string.cd_backspace))
                 }
             }
         }

@@ -14,8 +14,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.hanfood.warehouse.R
 import com.hanfood.warehouse.security.PinManager
 
 /**
@@ -28,6 +30,7 @@ fun PinSetupScreen(pinManager: PinManager, onDone: () -> Unit) {
     var firstPin by remember { mutableStateOf("") }
     var currentInput by remember { mutableStateOf("") }
     var errorText by remember { mutableStateOf<String?>(null) }
+    val mismatchError = stringResource(R.string.pin_setup_mismatch)
 
     Scaffold { padding ->
         Column(
@@ -35,11 +38,11 @@ fun PinSetupScreen(pinManager: PinManager, onDone: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Text("HAN FOOD Ombor", style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
+            Text(stringResource(R.string.app_name), style = MaterialTheme.typography.headlineSmall, fontWeight = FontWeight.Bold)
             Text(
                 text = when (stage) {
-                    SetupStage.ENTER -> "Ilovani himoyalash uchun 4 xonali PIN-kod o'rnating"
-                    SetupStage.CONFIRM -> "PIN-kodni yana bir marta kiriting"
+                    SetupStage.ENTER -> stringResource(R.string.pin_setup_title)
+                    SetupStage.CONFIRM -> stringResource(R.string.pin_setup_confirm)
                 },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
@@ -72,7 +75,7 @@ fun PinSetupScreen(pinManager: PinManager, onDone: () -> Unit) {
                                             pinManager.setPin(currentInput)
                                             onDone()
                                         } else {
-                                            errorText = "PIN-kodlar mos kelmadi, qaytadan urinib ko'ring"
+                                            errorText = mismatchError
                                             firstPin = ""
                                             currentInput = ""
                                             stage = SetupStage.ENTER
