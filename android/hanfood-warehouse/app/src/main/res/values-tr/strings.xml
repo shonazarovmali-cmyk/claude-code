@@ -59,6 +59,14 @@
     <string name="client_field_phone">Telefon numarası</string>
     <string name="client_field_address">Adres</string>
     <string name="client_field_note">Not (isteğe bağlı)</string>
+    <string name="client_field_location">Konum</string>
+    <string name="action_get_location">GPS konumunu al</string>
+    <string name="action_view_on_map">Haritada göster</string>
+    <string name="action_remove_location">Konumu kaldır</string>
+    <string name="location_capturing">Konum belirleniyor…</string>
+    <string name="error_location_permission_denied">Konum izni verilmedi</string>
+    <string name="error_location_unavailable">Konum belirlenemedi</string>
+    <string name="client_location_saved">Konum kaydedildi</string>
     <string name="error_client_name_required">Bir müşteri adı girin</string>
     <string name="error_client_not_found">Müşteri bulunamadı</string>
     <string name="cd_close">Kapat</string>

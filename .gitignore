@@ -35,6 +35,13 @@ __pycache__/
 logs
 
 data
+# The bare "data" rule above is meant for this repo's own top-level data/
+# cache dir, but its lack of a path anchor also matches any directory named
+# "data" anywhere in the tree — including the Android app's Kotlin package
+# com.hanfood.warehouse.data (Room entities/DAOs/repository). Un-ignore that
+# subtree explicitly so the Android app's data layer stays tracked.
+!android/hanfood-warehouse/**/data/
+!android/hanfood-warehouse/**/data/**
 .omc
 .codex/*
 !.codex/agents/

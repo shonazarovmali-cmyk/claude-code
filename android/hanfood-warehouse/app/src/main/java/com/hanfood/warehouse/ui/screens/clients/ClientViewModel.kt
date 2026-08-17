@@ -36,6 +36,9 @@ data class ClientEditUiState(
     val phone: String = "",
     val address: String = "",
     val note: String = "",
+    val latitude: Double? = null,
+    val longitude: Double? = null,
+    val locating: Boolean = false,
     val loaded: Boolean = false,
     val saved: Boolean = false,
     @StringRes val errorRes: Int? = null
@@ -60,6 +63,8 @@ class ClientEditViewModel(
                         phone = client.phone.orEmpty(),
                         address = client.address.orEmpty(),
                         note = client.note.orEmpty(),
+                        latitude = client.latitude,
+                        longitude = client.longitude,
                         loaded = true
                     )
                 } else {
@@ -71,6 +76,18 @@ class ClientEditViewModel(
 
     fun update(transform: (ClientEditUiState) -> ClientEditUiState) {
         _state.value = transform(_state.value)
+    }
+
+    fun setLocating(value: Boolean) {
+        _state.value = _state.value.copy(locating = value)
+    }
+
+    fun setLocation(latitude: Double?, longitude: Double?) {
+        _state.value = _state.value.copy(latitude = latitude, longitude = longitude, locating = false)
+    }
+
+    fun clearLocation() {
+        _state.value = _state.value.copy(latitude = null, longitude = null)
     }
 
     fun save() {
@@ -86,7 +103,9 @@ class ClientEditViewModel(
                     name = s.name.trim(),
                     phone = s.phone.trim().ifBlank { null },
                     address = s.address.trim().ifBlank { null },
-                    note = s.note.trim().ifBlank { null }
+                    note = s.note.trim().ifBlank { null },
+                    latitude = s.latitude,
+                    longitude = s.longitude
                 )
             )
             _state.value = _state.value.copy(saved = true, errorRes = null)

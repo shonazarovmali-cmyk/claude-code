@@ -14,7 +14,10 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   qoldiq, tannarx va sotish narxi bilan boshqarish. Mahsulot qo'shishda
   telefon galereyasidan rasm biriktirish mumkin, rasm ro'yxatda va tahrirlash
   ekranida ko'rinadi.
-- **Mijozlar**: nomi, telefoni, manzili bilan mijozlar bazasi.
+- **Mijozlar**: nomi, telefoni, manzili bilan mijozlar bazasi. Mijoz
+  qo'shishda **GPS joylashuvini olish** tugmasi bilan koordinatalarni
+  saqlash mumkin — keyin "Xaritada ko'rish" orqali Google Maps ilovasida
+  ochiladi (alohida Maps API kaliti/billing shart emas).
 - **Kirim** — ta'minotchidan yuk qabul qilish (qoldiqqa qo'shiladi).
 - **Chiqim (yuk berish)** — mijozga yuk berish (qoldiqdan ayiriladi, yetarli
   bo'lmasa xatolik ko'rsatiladi).
@@ -55,8 +58,12 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 - Rang sxemasi — **yashil va oq** (mijoz talabiga ko'ra): asosiy rang
   logotipdagi to'q yashil siyoh rangidan olingan (`BrandGreen #1E6F4C`),
   fon/sirtlar oq, teal/oltin/lojuvard faqat kichik brend urg'ulari sifatida
-  (sarlavha gradienti, ikonka) qoldirilgan. Sozlamalar → Til kabi qorong'i
-  rejim uchun ham mos palitra bor.
+  (ikonka) qoldirilgan. Sozlamalar → Til kabi qorong'i rejim uchun ham mos
+  palitra bor.
+- **Sarlavha (header)**: haqiqiy `HAN FOOD` logotip-yozuvi (gul nishoni +
+  "HAN FOOD" so'zi, tagline'siz — `res/drawable-nodpi/han_food_header_lockup.png`)
+  toza oq fonda, yetarlicha katta o'lchamda ko'rsatiladi (MoySklad CRM
+  uslubidagi biznes-ilova ko'rinishi uchun qorong'i gradient banner o'rniga).
 - **Yuqori menyu**: navigatsiya pastki panel o'rniga ilovaning **tepasida**
   joylashgan (`ui/components/TopTabMenu.kt`) — tanlangan bo'lim rangi
   to'qlashadi (qalin, asosiy yashil rangda), boshqalari xira ko'rinadi.
@@ -64,10 +71,14 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 ## Texnologiyalar
 
 - Kotlin + Jetpack Compose (Material 3)
-- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` bilan
-  (mahsulot rasmi, faktura nomi/biriktirmalar ustunlari qo'shildi)
+- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` va `Migration(2,3)`
+  bilan (mahsulot rasmi, faktura nomi/biriktirmalar, mijoz GPS
+  koordinatalari ustunlari qo'shildi)
 - CameraX + ML Kit Barcode Scanning
 - Coil — mahsulot rasmi va faktura biriktirmalarini ko'rsatish
+- Google Play Services — `FusedLocationProviderClient` (mijoz GPS
+  joylashuvini olish uchun; alohida Maps API kaliti/billing shart emas —
+  saqlangan nuqta oddiy `geo:` intent orqali Google Maps ilovasida ochiladi)
 - Navigation Compose
 - EncryptedSharedPreferences + BiometricPrompt — xavfsizlik
 - `android.graphics.pdf` — tashqi kutubxonasiz PDF faktura yaratish

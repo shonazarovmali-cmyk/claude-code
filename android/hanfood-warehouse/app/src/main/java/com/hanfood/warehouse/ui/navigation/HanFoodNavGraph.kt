@@ -85,7 +85,6 @@ fun HanFoodNavGraph(app: HanFoodApp, activity: FragmentActivity) {
             if (showTopTabs) {
                 Column {
                     BrandHeader(
-                        title = appName,
                         trailingIcon = Icons.Filled.Settings,
                         trailingContentDescription = stringResource(R.string.cd_settings),
                         onTrailingClick = { navController.navigate(Routes.SETTINGS) }

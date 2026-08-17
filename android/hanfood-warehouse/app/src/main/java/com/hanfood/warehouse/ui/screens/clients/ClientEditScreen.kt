@@ -1,15 +1,29 @@
 package com.hanfood.warehouse.ui.screens.clients
 
+import android.Manifest
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Map
 import androidx.compose.material3.Button
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -17,15 +31,24 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.hanfood.warehouse.R
 import com.hanfood.warehouse.data.repository.WarehouseRepository
 import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.util.GenericViewModelFactory
+import com.hanfood.warehouse.util.LocationHelper
+import kotlinx.coroutines.launch
+import java.util.Locale
 
 @Composable
 fun ClientEditScreen(
@@ -38,9 +61,36 @@ fun ClientEditScreen(
         factory = GenericViewModelFactory { ClientEditViewModel(repository, clientId) }
     )
     val state by viewModel.state.collectAsState()
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(state.saved) {
         if (state.saved) onBack()
+    }
+
+    fun fetchLocation() {
+        viewModel.setLocating(true)
+        scope.launch {
+            val result = LocationHelper.getCurrentLocation(context)
+            if (result != null) {
+                viewModel.setLocation(result.first, result.second)
+            } else {
+                viewModel.setLocating(false)
+                viewModel.update { it.copy(errorRes = R.string.error_location_unavailable) }
+            }
+        }
+    }
+
+    val locationPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { granted ->
+        val allowed = granted[Manifest.permission.ACCESS_FINE_LOCATION] == true ||
+            granted[Manifest.permission.ACCESS_COARSE_LOCATION] == true
+        if (allowed) {
+            fetchLocation()
+        } else {
+            viewModel.update { it.copy(errorRes = R.string.error_location_permission_denied) }
+        }
     }
 
     Scaffold(
@@ -87,6 +137,25 @@ fun ClientEditScreen(
                 modifier = Modifier.fillMaxWidth()
             )
 
+            ClientLocationSection(
+                latitude = state.latitude,
+                longitude = state.longitude,
+                locating = state.locating,
+                clientName = state.name,
+                onCapture = {
+                    viewModel.update { it.copy(errorRes = null) }
+                    if (LocationHelper.hasLocationPermission(context)) {
+                        fetchLocation()
+                    } else {
+                        locationPermissionLauncher.launch(
+                            arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION)
+                        )
+                    }
+                },
+                onClear = { viewModel.clearLocation() },
+                onViewOnMap = { lat, lon -> LocationHelper.openInMaps(context, lat, lon, state.name) }
+            )
+
             val errorRes = state.errorRes
             if (errorRes != null) {
                 Text(stringResource(errorRes), color = MaterialTheme.colorScheme.error)
@@ -94,6 +163,61 @@ fun ClientEditScreen(
 
             Button(onClick = { viewModel.save() }, modifier = Modifier.fillMaxWidth()) {
                 Text(stringResource(R.string.action_save))
+            }
+        }
+    }
+}
+
+@Composable
+private fun ClientLocationSection(
+    latitude: Double?,
+    longitude: Double?,
+    locating: Boolean,
+    clientName: String,
+    onCapture: () -> Unit,
+    onClear: () -> Unit,
+    onViewOnMap: (Double, Double) -> Unit
+) {
+    if (latitude != null && longitude != null) {
+        OutlinedCard(
+            modifier = Modifier.fillMaxWidth(),
+            colors = CardDefaults.outlinedCardColors(containerColor = MaterialTheme.colorScheme.surface)
+        ) {
+            Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                    Icon(Icons.Filled.LocationOn, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text(
+                            stringResource(R.string.client_field_location),
+                            style = MaterialTheme.typography.labelMedium,
+                            fontWeight = FontWeight.SemiBold
+                        )
+                        Text(
+                            String.format(Locale.US, "%.6f, %.6f", latitude, longitude),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    IconButton(onClick = onClear) {
+                        Icon(Icons.Filled.Close, contentDescription = stringResource(R.string.action_remove_location))
+                    }
+                }
+                OutlinedButton(onClick = { onViewOnMap(latitude, longitude) }, modifier = Modifier.fillMaxWidth()) {
+                    Icon(Icons.Filled.Map, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Text(stringResource(R.string.action_view_on_map), modifier = Modifier.padding(start = 8.dp))
+                }
+            }
+        }
+    } else {
+        OutlinedButton(onClick = onCapture, enabled = !locating, modifier = Modifier.fillMaxWidth()) {
+            if (locating) {
+                Box(modifier = Modifier.size(18.dp)) {
+                    CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+                }
+                Text(stringResource(R.string.location_capturing), modifier = Modifier.padding(start = 8.dp))
+            } else {
+                Icon(Icons.Filled.LocationOn, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(stringResource(R.string.action_get_location), modifier = Modifier.padding(start = 8.dp))
             }
         }
     }

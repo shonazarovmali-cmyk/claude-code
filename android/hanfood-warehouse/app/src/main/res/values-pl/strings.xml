@@ -59,6 +59,14 @@
     <string name="client_field_phone">Numer telefonu</string>
     <string name="client_field_address">Adres</string>
     <string name="client_field_note">Notatka (opcjonalnie)</string>
+    <string name="client_field_location">Lokalizacja</string>
+    <string name="action_get_location">Pobierz lokalizację GPS</string>
+    <string name="action_view_on_map">Pokaż na mapie</string>
+    <string name="action_remove_location">Usuń lokalizację</string>
+    <string name="location_capturing">Ustalanie lokalizacji…</string>
+    <string name="error_location_permission_denied">Nie udzielono uprawnienia do lokalizacji</string>
+    <string name="error_location_unavailable">Nie udało się ustalić lokalizacji</string>
+    <string name="client_location_saved">Lokalizacja zapisana</string>
     <string name="error_client_name_required">Podaj nazwę klienta</string>
     <string name="error_client_not_found">Nie znaleziono klienta</string>
     <string name="cd_close">Zamknij</string>

@@ -14,8 +14,8 @@ android {
         applicationId = "com.hanfood.warehouse"
         minSdk = 26
         targetSdk = 34
-        versionCode = 5
-        versionName = "1.3.1"
+        versionCode = 6
+        versionName = "1.4.0"
 
         vectorDrawables.useSupportLibrary = true
 
@@ -99,6 +99,7 @@ dependencies {
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.biometric)
     implementation(libs.androidx.datastore.preferences)
+    implementation(libs.play.services.location)
 
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.serialization.json)

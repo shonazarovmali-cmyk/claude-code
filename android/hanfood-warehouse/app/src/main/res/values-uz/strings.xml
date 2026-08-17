@@ -59,6 +59,14 @@
     <string name="client_field_phone">Telefon raqami</string>
     <string name="client_field_address">Manzil</string>
     <string name="client_field_note">Izoh (ixtiyoriy)</string>
+    <string name="client_field_location">Joylashuv</string>
+    <string name="action_get_location">GPS joylashuvni olish</string>
+    <string name="action_view_on_map">Xaritada ko\'rish</string>
+    <string name="action_remove_location">Joylashuvni olib tashlash</string>
+    <string name="location_capturing">Joylashuv aniqlanmoqda…</string>
+    <string name="error_location_permission_denied">Joylashuvga ruxsat berilmadi</string>
+    <string name="error_location_unavailable">Joylashuvni aniqlab bo\'lmadi</string>
+    <string name="client_location_saved">Joylashuv saqlangan</string>
     <string name="error_client_name_required">Mijoz nomini kiriting</string>
     <string name="error_client_not_found">Mijoz topilmadi</string>
     <string name="cd_close">Yopish</string>
