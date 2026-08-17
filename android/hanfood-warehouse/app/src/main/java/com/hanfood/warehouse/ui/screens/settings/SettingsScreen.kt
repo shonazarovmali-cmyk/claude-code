@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -29,6 +31,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.hanfood.warehouse.BuildConfig
@@ -39,6 +42,7 @@ import com.hanfood.warehouse.ui.components.BackTopBar
 import com.hanfood.warehouse.util.AppLanguage
 import com.hanfood.warehouse.util.DatabaseExporter
 import com.hanfood.warehouse.util.LanguageManager
+import com.hanfood.warehouse.util.PricingSettings
 
 @Composable
 fun SettingsScreen(
@@ -53,6 +57,8 @@ fun SettingsScreen(
     var showLanguageDialog by remember { mutableStateOf(false) }
     var currentLanguage by remember { mutableStateOf(LanguageManager.currentLanguage()) }
     val backupShareTitle = stringResource(R.string.settings_backup_share_title)
+    var eurPlnRateText by remember { mutableStateOf(PricingSettings.getEurToPlnRate(context).toPlainText()) }
+    var markupPercentText by remember { mutableStateOf(PricingSettings.getDefaultMarkupPercent(context).toPlainText()) }
 
     Scaffold(topBar = { BackTopBar(title = stringResource(R.string.settings_title), onBack = onBack) }) { padding ->
         Column(modifier = Modifier.fillMaxSize().padding(padding).padding(16.dp), verticalArrangement = Arrangement.spacedBy(14.dp)) {
@@ -62,6 +68,37 @@ fun SettingsScreen(
                     title = stringResource(R.string.settings_section_language),
                     subtitle = currentLanguage.displayName.ifBlank { stringResource(R.string.settings_language_system) },
                     onClick = { showLanguageDialog = true }
+                )
+            }
+
+            SettingsSection(title = stringResource(R.string.settings_section_pricing)) {
+                Text(
+                    stringResource(R.string.settings_pricing_subtitle),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 8.dp)
+                )
+                OutlinedTextField(
+                    value = eurPlnRateText,
+                    onValueChange = { value ->
+                        eurPlnRateText = value
+                        value.toFloatOrNull()?.let { PricingSettings.setEurToPlnRate(context, it) }
+                    },
+                    label = { Text(stringResource(R.string.settings_eur_pln_rate)) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+                OutlinedTextField(
+                    value = markupPercentText,
+                    onValueChange = { value ->
+                        markupPercentText = value
+                        value.toFloatOrNull()?.let { PricingSettings.setDefaultMarkupPercent(context, it) }
+                    },
+                    label = { Text(stringResource(R.string.settings_default_markup)) },
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 10.dp),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
                 )
             }
 
@@ -211,3 +248,6 @@ private fun SettingsRow(title: String, subtitle: String, onClick: () -> Unit) {
         }
     }
 }
+
+private fun Float.toPlainText(): String =
+    if (this == this.toLong().toFloat()) this.toLong().toString() else this.toString()

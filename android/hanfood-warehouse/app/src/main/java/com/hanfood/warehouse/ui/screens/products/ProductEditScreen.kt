@@ -22,12 +22,17 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddAPhoto
+import androidx.compose.material.icons.filled.Calculate
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.CurrencyExchange
 import androidx.compose.material.icons.filled.QrCodeScanner
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -57,6 +62,8 @@ import com.hanfood.warehouse.ui.components.DeleteAction
 import com.hanfood.warehouse.ui.navigation.ScannerBus
 import com.hanfood.warehouse.util.FileStorage
 import com.hanfood.warehouse.util.GenericViewModelFactory
+import com.hanfood.warehouse.util.PricingSettings
+import com.hanfood.warehouse.util.formatMoney
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -168,6 +175,23 @@ fun ProductEditScreen(
                 }
             }
 
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = state.articleNumber,
+                    onValueChange = { v -> viewModel.update { it.copy(articleNumber = v) } },
+                    label = { Text(stringResource(R.string.product_field_article_number)) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+                OutlinedTextField(
+                    value = state.hsCode,
+                    onValueChange = { v -> viewModel.update { it.copy(hsCode = v) } },
+                    label = { Text(stringResource(R.string.product_field_hs_code)) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
+                )
+            }
+
             OutlinedTextField(
                 value = state.unit,
                 onValueChange = { v -> viewModel.update { it.copy(unit = v) } },
@@ -195,6 +219,23 @@ fun ProductEditScreen(
                 )
             }
 
+            Row(verticalAlignment = androidx.compose.ui.Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = state.priceEur,
+                    onValueChange = { v -> viewModel.update { it.copy(priceEur = v) } },
+                    label = { Text(stringResource(R.string.product_field_price_eur)) },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true,
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+                )
+                IconButton(
+                    onClick = { viewModel.convertEurToPln(PricingSettings.getEurToPlnRate(context)) },
+                    enabled = state.priceEur.toDoubleOrNull() != null
+                ) {
+                    Icon(Icons.Filled.CurrencyExchange, contentDescription = stringResource(R.string.action_convert_to_pln))
+                }
+            }
+
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 OutlinedTextField(
                     value = state.purchasePrice,
@@ -214,10 +255,41 @@ fun ProductEditScreen(
                 )
             }
 
+            OutlinedButton(
+                onClick = { viewModel.calculateSellPrice(PricingSettings.getDefaultMarkupPercent(context)) },
+                enabled = state.purchasePrice.toDoubleOrNull() != null,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(Icons.Filled.Calculate, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(
+                    stringResource(R.string.action_calculate_sell_price, PricingSettings.getDefaultMarkupPercent(context).toInt()),
+                    modifier = Modifier.padding(start = 8.dp)
+                )
+            }
+
+            OutlinedTextField(
+                value = state.piecesPerBox,
+                onValueChange = { v -> viewModel.update { it.copy(piecesPerBox = v) } },
+                label = { Text(stringResource(R.string.product_field_pieces_per_box)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal)
+            )
+
+            state.pricingSummary?.let { summary -> ProductPricingSummaryCard(summary) }
+
             OutlinedTextField(
                 value = state.category,
                 onValueChange = { v -> viewModel.update { it.copy(category = v) } },
                 label = { Text(stringResource(R.string.product_field_category)) },
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true
+            )
+
+            OutlinedTextField(
+                value = state.status,
+                onValueChange = { v -> viewModel.update { it.copy(status = v) } },
+                label = { Text(stringResource(R.string.product_field_status)) },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true
             )
@@ -326,6 +398,41 @@ private fun ProductPhotoPicker(
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(top = 4.dp)
         )
+    }
+}
+
+/**
+ * Live-computed box/total pricing — visible once [ProductEditUiState.piecesPerBox]
+ * is set. [ProductEditUiState.quantity] is read as the number of boxes here
+ * (matching a "Kolli" column in a supplier price list): pieces-per-box ×
+ * quantity = total pieces, and purchase/sell price × pieces-per-box gives a
+ * per-box price.
+ */
+@Composable
+private fun ProductPricingSummaryCard(summary: ProductPricingSummary) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f))
+    ) {
+        Column(modifier = Modifier.padding(14.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Text(
+                stringResource(R.string.pricing_summary_title),
+                style = MaterialTheme.typography.labelLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            PricingSummaryRow(stringResource(R.string.pricing_summary_box_price), formatMoney(summary.boxPrice))
+            PricingSummaryRow(stringResource(R.string.pricing_summary_box_price_markup), formatMoney(summary.boxPriceWithMarkup))
+            PricingSummaryRow(stringResource(R.string.pricing_summary_total), formatMoney(summary.totalPrice))
+            PricingSummaryRow(stringResource(R.string.pricing_summary_total_markup), formatMoney(summary.totalPriceWithMarkup))
+        }
+    }
+}
+
+@Composable
+private fun PricingSummaryRow(label: String, value: String) {
+    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+        Text(label, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+        Text(value, style = MaterialTheme.typography.bodySmall, fontWeight = androidx.compose.ui.text.font.FontWeight.Medium)
     }
 }
 

@@ -21,7 +21,7 @@ import com.hanfood.warehouse.data.local.entity.TransactionItem
  */
 @Database(
     entities = [Product::class, Client::class, StockTransaction::class, TransactionItem::class],
-    version = 4,
+    version = 5,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -73,6 +73,21 @@ abstract class AppDatabase : RoomDatabase() {
             }
         }
 
+        /**
+         * v4 -> v5: import qiluvchi ta'minotchilar uchun kengaytirilgan
+         * mahsulot maydonlari — artikul raqami, bojxona (H.S.) kodi, quti/
+         * karobka ichidagi dona soni, evro narxi va erkin holat matni.
+         */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE products ADD COLUMN article_number TEXT")
+                db.execSQL("ALTER TABLE products ADD COLUMN hs_code TEXT")
+                db.execSQL("ALTER TABLE products ADD COLUMN pieces_per_box REAL")
+                db.execSQL("ALTER TABLE products ADD COLUMN price_eur REAL")
+                db.execSQL("ALTER TABLE products ADD COLUMN status TEXT")
+            }
+        }
+
         @Volatile
         private var instance: AppDatabase? = null
 
@@ -83,7 +98,7 @@ abstract class AppDatabase : RoomDatabase() {
                     AppDatabase::class.java,
                     DB_NAME
                 )
-                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                     .build().also { instance = it }
             }
     }

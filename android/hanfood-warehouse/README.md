@@ -30,6 +30,14 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
   mahsulotlar shtrix-kod/nomi bo'yicha topilib miqdori qo'shiladi, yangilari
   yaratiladi, hammasi bitta kirim fakturasi sifatida yoziladi (summasi
   avtomatik hisoblanadi).
+- **Import/optom savdo maydonlari** (ixtiyoriy): mahsulot qo'shishda artikul
+  raqami (Art-Nr), bojxona H.S. kodi, quti/karobkadagi dona soni, evro
+  narxi va erkin holat matni ham kiritish mumkin. Evro narxidan "zł'ga
+  o'tkazish" tugmasi bilan Sozlamalar → Narx standartlaridagi kursga ko'ra
+  tannarxni avtomatik hisoblaydi; "Sotish narxini hisoblash" tugmasi esa
+  standart ustama foizi bo'yicha sotish narxini taklif qiladi. Quti dona
+  soni kiritilsa, quti narxi va jami narx (barcha qutilar, ustamali/
+  ustamasiz) jonli hisoblab ko'rsatiladi.
 - **Kirim** — ta'minotchidan yuk qabul qilish (qoldiqqa qo'shiladi).
 - **Chiqim (yuk berish)** — mijozga yuk berish (qoldiqdan ayiriladi, yetarli
   bo'lmasa xatolik ko'rsatiladi).
@@ -91,9 +99,10 @@ Ilova **to'liq oflayn** ishlaydi — barcha ma'lumotlar qurilmaning o'zida
 
 - Kotlin + Jetpack Compose (Material 3), `HorizontalPager` — mahsulot
   rasmlari galereyasi
-- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` → `Migration(3,4)`
+- Room (SQLite) — lokal ma'lumotlar bazasi, `Migration(1,2)` → `Migration(4,5)`
   bilan (mahsulot rasmlari — endi ro'yxat, faktura nomi/biriktirmalar,
-  mijoz GPS koordinatalari ustunlari qo'shildi)
+  mijoz GPS koordinatalari, artikul/H.S. kod/quti dona soni/evro narxi/
+  holat ustunlari qo'shildi)
 - CameraX + ML Kit Barcode Scanning
 - Coil — mahsulot rasmlari va faktura biriktirmalarini ko'rsatish
 - Google Play Services — `FusedLocationProviderClient` (mijoz GPS

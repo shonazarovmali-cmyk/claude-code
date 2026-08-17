@@ -77,10 +77,38 @@ data class ProductEditUiState(
     val sellPrice: String = "0",
     val category: String = "",
     val imagePaths: List<String> = emptyList(),
+    val articleNumber: String = "",
+    val hsCode: String = "",
+    val piecesPerBox: String = "",
+    val priceEur: String = "",
+    val status: String = "",
     val loaded: Boolean = false,
     val saved: Boolean = false,
     val deleted: Boolean = false,
     @StringRes val errorRes: Int? = null
+) {
+    /** Live pricing summary — only meaningful once [piecesPerBox] is set (a boxed/wholesale product). */
+    val pricingSummary: ProductPricingSummary?
+        get() {
+            val pieces = piecesPerBox.toDoubleOrNull() ?: return null
+            if (pieces <= 0) return null
+            val purchase = purchasePrice.toDoubleOrNull() ?: 0.0
+            val sell = sellPrice.toDoubleOrNull() ?: 0.0
+            val boxes = quantity.toDoubleOrNull() ?: 0.0
+            return ProductPricingSummary(
+                boxPrice = purchase * pieces,
+                boxPriceWithMarkup = sell * pieces,
+                totalPrice = purchase * pieces * boxes,
+                totalPriceWithMarkup = sell * pieces * boxes
+            )
+        }
+}
+
+data class ProductPricingSummary(
+    val boxPrice: Double,
+    val boxPriceWithMarkup: Double,
+    val totalPrice: Double,
+    val totalPriceWithMarkup: Double
 )
 
 class ProductEditViewModel(
@@ -107,6 +135,11 @@ class ProductEditViewModel(
                         sellPrice = product.sellPrice.toPlainStringTrimmed(),
                         category = product.category.orEmpty(),
                         imagePaths = product.imagePaths.toAttachmentList(),
+                        articleNumber = product.articleNumber.orEmpty(),
+                        hsCode = product.hsCode.orEmpty(),
+                        piecesPerBox = product.piecesPerBox?.toPlainStringTrimmed().orEmpty(),
+                        priceEur = product.priceEur?.toPlainStringTrimmed().orEmpty(),
+                        status = product.status.orEmpty(),
                         loaded = true
                     )
                 } else {
@@ -135,6 +168,18 @@ class ProductEditViewModel(
         _state.value = _state.value.copy(imagePaths = _state.value.imagePaths.filterNot { it == path })
     }
 
+    /** Fills [ProductEditUiState.purchasePrice] from [ProductEditUiState.priceEur] × the configured EUR→PLN rate. */
+    fun convertEurToPln(rate: Float) {
+        val eur = _state.value.priceEur.toDoubleOrNull() ?: return
+        _state.value = _state.value.copy(purchasePrice = (eur * rate).toPlainStringTrimmed())
+    }
+
+    /** Suggests [ProductEditUiState.sellPrice] as purchasePrice + the configured markup %. */
+    fun calculateSellPrice(markupPercent: Float) {
+        val purchase = _state.value.purchasePrice.toDoubleOrNull() ?: return
+        _state.value = _state.value.copy(sellPrice = (purchase * (1 + markupPercent / 100.0)).toPlainStringTrimmed())
+    }
+
     fun delete() {
         if (productId == 0L) return
         viewModelScope.launch {
@@ -161,7 +206,12 @@ class ProductEditViewModel(
                 purchasePrice = s.purchasePrice.toDoubleOrNull() ?: 0.0,
                 sellPrice = s.sellPrice.toDoubleOrNull() ?: 0.0,
                 category = s.category.trim().ifBlank { null },
-                imagePaths = s.imagePaths.toAttachmentPathsString()
+                imagePaths = s.imagePaths.toAttachmentPathsString(),
+                articleNumber = s.articleNumber.trim().ifBlank { null },
+                hsCode = s.hsCode.trim().ifBlank { null },
+                piecesPerBox = s.piecesPerBox.toDoubleOrNull(),
+                priceEur = s.priceEur.toDoubleOrNull(),
+                status = s.status.trim().ifBlank { null }
             )
             try {
                 repository.upsertProduct(product)
