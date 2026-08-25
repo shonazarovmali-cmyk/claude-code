@@ -1,0 +1,105 @@
+package com.hanfood.warehouse.data.local
+
+import android.content.Context
+import androidx.room.Database
+import androidx.room.Room
+import androidx.room.RoomDatabase
+import androidx.room.TypeConverters
+import androidx.room.migration.Migration
+import androidx.sqlite.db.SupportSQLiteDatabase
+import com.hanfood.warehouse.data.local.dao.ClientDao
+import com.hanfood.warehouse.data.local.dao.ProductDao
+import com.hanfood.warehouse.data.local.dao.TransactionDao
+import com.hanfood.warehouse.data.local.entity.Client
+import com.hanfood.warehouse.data.local.entity.Product
+import com.hanfood.warehouse.data.local.entity.StockTransaction
+import com.hanfood.warehouse.data.local.entity.TransactionItem
+
+/**
+ * Ilovaning yagona lokal ma'lumotlar bazasi. Internetga bog'liq emas — barcha
+ * ombor ma'lumotlari shu qurilmada saqlanadi.
+ */
+@Database(
+    entities = [Product::class, Client::class, StockTransaction::class, TransactionItem::class],
+    version = 5,
+    exportSchema = true
+)
+@TypeConverters(Converters::class)
+abstract class AppDatabase : RoomDatabase() {
+
+    abstract fun productDao(): ProductDao
+    abstract fun clientDao(): ClientDao
+    abstract fun transactionDao(): TransactionDao
+
+    companion object {
+        private const val DB_NAME = "hanfood_warehouse.db"
+
+        /**
+         * v1 -> v2: mahsulot rasmi (products.image_path) va faktura nomi/biriktirilgan
+         * fayllar (stock_transactions.title, stock_transactions.attachment_paths).
+         * Mavjud foydalanuvchi ma'lumotlarini saqlab qolish uchun destructive emas,
+         * qo'shimcha ustunlar bilan haqiqiy migratsiya.
+         */
+        private val MIGRATION_1_2 = object : Migration(1, 2) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE products ADD COLUMN image_path TEXT")
+                db.execSQL("ALTER TABLE stock_transactions ADD COLUMN title TEXT")
+                db.execSQL("ALTER TABLE stock_transactions ADD COLUMN attachment_paths TEXT")
+            }
+        }
+
+        /**
+         * v2 -> v3: mijozning GPS joylashuvi (clients.latitude/longitude) — mijoz
+         * qo'shishda "GPS joylashuvni olish" tugmasi bilan yoziladi, Google Maps
+         * ilovasida ochish uchun ishlatiladi.
+         */
+        private val MIGRATION_2_3 = object : Migration(2, 3) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE clients ADD COLUMN latitude REAL")
+                db.execSQL("ALTER TABLE clients ADD COLUMN longitude REAL")
+            }
+        }
+
+        /**
+         * v3 -> v4: mahsulotda bitta rasm o'rniga o'ntagacha rasm (products.image_paths,
+         * vergul bilan ajratilgan ro'yxat). Eski `image_path` ustunidagi mavjud rasm
+         * yangi ustunga ko'chiriladi (yo'qolmaydi); eski ustun o'zi ishlatilmay qoladi
+         * (Room jadvaldagi ortiqcha ustunlarni e'tiborsiz qoldiradi, xato bermaydi).
+         */
+        private val MIGRATION_3_4 = object : Migration(3, 4) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE products ADD COLUMN image_paths TEXT")
+                db.execSQL("UPDATE products SET image_paths = image_path WHERE image_path IS NOT NULL")
+            }
+        }
+
+        /**
+         * v4 -> v5: import qiluvchi ta'minotchilar uchun kengaytirilgan
+         * mahsulot maydonlari — artikul raqami, bojxona (H.S.) kodi, quti/
+         * karobka ichidagi dona soni, evro narxi va erkin holat matni.
+         */
+        private val MIGRATION_4_5 = object : Migration(4, 5) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                db.execSQL("ALTER TABLE products ADD COLUMN article_number TEXT")
+                db.execSQL("ALTER TABLE products ADD COLUMN hs_code TEXT")
+                db.execSQL("ALTER TABLE products ADD COLUMN pieces_per_box REAL")
+                db.execSQL("ALTER TABLE products ADD COLUMN price_eur REAL")
+                db.execSQL("ALTER TABLE products ADD COLUMN status TEXT")
+            }
+        }
+
+        @Volatile
+        private var instance: AppDatabase? = null
+
+        fun getInstance(context: Context): AppDatabase =
+            instance ?: synchronized(this) {
+                instance ?: Room.databaseBuilder(
+                    context.applicationContext,
+                    AppDatabase::class.java,
+                    DB_NAME
+                )
+                    .addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
+                    .build().also { instance = it }
+            }
+    }
+}
